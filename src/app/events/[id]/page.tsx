@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -59,7 +59,8 @@ const MOCK_MESSAGES = [
   { id: '2', sender: 'Tony Stark', text: "I'll bring the tech. Who's got the food?", time: '10:05 AM EST' },
 ];
 
-export default function EventDetailPage({ params }: { params: { id: string } }) {
+export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   
