@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -57,7 +56,7 @@ export default function Home() {
                 </p>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row pt-4">
                   <Button asChild size="lg" className="rounded-full px-8 text-lg font-semibold shadow-xl shadow-primary/30">
-                    <Link href="/dashboard">Activate Now</Link>
+                    <Link href="/events/new">Create New Event</Link>
                   </Button>
                   <Button variant="outline" size="lg" className="rounded-full px-8 text-lg border-2 border-primary text-primary hover:bg-primary/5">
                     View Dossier
