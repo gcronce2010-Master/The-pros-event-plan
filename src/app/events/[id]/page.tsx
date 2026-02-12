@@ -1,14 +1,12 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { 
   Dialog,
   DialogContent,
@@ -20,8 +18,14 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
   MessageSquare, 
-  Users, 
   ClipboardList, 
   Settings, 
   Send, 
@@ -31,7 +35,6 @@ import {
   MapPin, 
   Sparkles,
   CheckCircle2,
-  MoreVertical,
   UserPlus,
   Trash2
 } from 'lucide-react';
@@ -60,10 +63,16 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   const [chatMessages, setChatMessages] = useState(MOCK_MESSAGES);
   const [guests, setGuests] = useState(MOCK_GUESTS);
   
-  // Add Task State
+  // Task Dialog State
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [newTaskDesc, setNewTaskDesc] = useState('');
   const [newTaskTimeline, setNewTaskTimeline] = useState('1 week before');
+
+  // Guest Dialog State
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [newGuestName, setNewGuestName] = useState('');
+  const [newGuestStatus, setNewGuestStatus] = useState('Pending');
+  const [newGuestDiet, setNewGuestDiet] = useState('');
 
   const event = {
     name: "Alex's 30th Birthday Bash",
@@ -83,6 +92,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         eventDate: new Date(event.date).toISOString(),
       });
       setTasks(result.tasks.map(t => ({ ...t, completed: false })));
+      toast({ title: "Tasks generated", description: "AI has suggested a planning timeline for you." });
     } catch (err) {
       toast({ title: "Error", description: "Failed to generate tasks", variant: "destructive" });
     } finally {
@@ -106,6 +116,22 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     const newTasks = [...tasks];
     newTasks.splice(index, 1);
     setTasks(newTasks);
+  };
+
+  const handleInviteGuest = () => {
+    if (!newGuestName.trim()) return;
+    const newGuest = {
+      id: Date.now().toString(),
+      name: newGuestName,
+      status: newGuestStatus,
+      diet: newGuestDiet || 'None'
+    };
+    setGuests([...guests, newGuest]);
+    setNewGuestName('');
+    setNewGuestStatus('Pending');
+    setNewGuestDiet('');
+    setIsInviteOpen(false);
+    toast({ title: "Guest invited", description: `${newGuestName} has been added to the list.` });
   };
 
   const handleSendMessage = () => {
@@ -214,7 +240,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                     <span className="font-bold text-accent">{tasks.filter(t => !t.completed).length}</span>
                   </div>
                   <Button className="w-full rounded-full" onClick={() => setActiveTab('guests')}>
-                    Invite More Guests
+                    Manage Guests
                   </Button>
                 </CardContent>
               </Card>
@@ -227,7 +253,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleGenerateTasks} disabled={loadingTasks} className="rounded-full">
                   <Sparkles className="h-4 w-4 mr-2" />
-                  {tasks.length > 0 ? 'Regenerate with AI' : 'Suggest Tasks'}
+                  {tasks.length > 0 ? 'Regenerate' : 'Suggest Tasks'}
                 </Button>
                 
                 <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
@@ -241,7 +267,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                     <DialogHeader>
                       <DialogTitle>Add New Task</DialogTitle>
                       <DialogDescription>
-                        Manually add a task to your planning checklist.
+                        Add a task to your planning checklist.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -291,7 +317,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                         <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>{task.description}</p>
                         <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mt-1">{task.timeline}</p>
                       </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -320,10 +346,60 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           <TabsContent value="guests" className="animate-fade-in space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-headline font-bold">Guest List</h2>
-              <Button size="sm" className="rounded-full">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Invite
-              </Button>
+              
+              <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="rounded-full">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Invite Guest
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Invite New Guest</DialogTitle>
+                    <DialogDescription>
+                      Add a guest to your event's tracking list.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="guest-name">Guest Name</Label>
+                      <Input 
+                        id="guest-name" 
+                        placeholder="e.g., Emily Smith" 
+                        value={newGuestName}
+                        onChange={(e) => setNewGuestName(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="guest-status">RSVP Status</Label>
+                      <Select value={newGuestStatus} onValueChange={setNewGuestStatus}>
+                        <SelectTrigger id="guest-status">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Attending">Attending</SelectItem>
+                          <SelectItem value="Maybe">Maybe</SelectItem>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Declined">Declined</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="guest-diet">Dietary Info</Label>
+                      <Input 
+                        id="guest-diet" 
+                        placeholder="e.g., Vegan, Nut Allergy" 
+                        value={newGuestDiet}
+                        onChange={(e) => setNewGuestDiet(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleInviteGuest} disabled={!newGuestName.trim()}>Add to List</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <Card className="shadow-sm border-none ring-1 ring-border">
@@ -350,7 +426,11 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <Badge variant={guest.status === 'Attending' ? 'default' : guest.status === 'Maybe' ? 'secondary' : 'outline'}>
+                            <Badge variant={
+                              guest.status === 'Attending' ? 'default' : 
+                              guest.status === 'Maybe' ? 'secondary' : 
+                              guest.status === 'Declined' ? 'destructive' : 'outline'
+                            }>
                               {guest.status}
                             </Badge>
                           </td>
@@ -358,7 +438,14 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                             {guest.diet}
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <Button variant="ghost" size="sm" className="rounded-full text-primary hover:text-primary hover:bg-primary/10">Message</Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="rounded-full text-destructive hover:bg-destructive/10"
+                              onClick={() => setGuests(guests.filter(g => g.id !== guest.id))}
+                            >
+                              Remove
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -374,11 +461,11 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               <CardHeader className="border-b px-6 py-4 flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="font-headline text-lg">Event Chat</CardTitle>
-                  <CardDescription>Plan details with your guests in real-time</CardDescription>
+                  <CardDescription>Plan details with your guests</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" className="rounded-full" onClick={handleAiMessageDraft}>
                   <Sparkles className="h-4 w-4 mr-2 text-primary" />
-                  AI Message Help
+                  AI Draft
                 </Button>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto p-6 space-y-6 bg-secondary/5">
