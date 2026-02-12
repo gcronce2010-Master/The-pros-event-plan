@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'AI Party - Plan Smarter, Celebrate Better',
-  description: 'AI-powered party planning and management for unforgettable events.',
+  title: 'The Pros - Plan Smarter, Celebrate Better',
+  description: 'Elite party planning and management for unforgettable events.',
 };
 
 export default function RootLayout({

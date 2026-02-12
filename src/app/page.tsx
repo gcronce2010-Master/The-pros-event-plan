@@ -15,7 +15,7 @@ export default function Home() {
           <div className="bg-primary p-1.5 rounded-lg text-white group-hover:scale-110 transition-transform">
             <Shield className="h-6 w-6" />
           </div>
-          <span className="font-headline text-2xl font-bold tracking-tight">Hero Party</span>
+          <span className="font-headline text-2xl font-bold tracking-tight">The Pros</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link className="text-sm font-medium hover:text-primary transition-colors mt-2" href="/dashboard">
@@ -38,10 +38,10 @@ export default function Home() {
                   <span>Assemble your ultimate celebration</span>
                 </div>
                 <h1 className="text-4xl font-headline font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                  Plan <span className="text-primary italic">Legendary</span> Events with AI Powers
+                  Plan <span className="text-primary italic">Legendary</span> Events with The Pros
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  Transform ordinary gatherings into extraordinary assemblies. From cosmic themes to top-secret guest lists, Hero Party handles the heavy lifting.
+                  Transform ordinary gatherings into extraordinary assemblies. From cosmic themes to top-secret guest lists, The Pros handle the heavy lifting.
                 </p>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row pt-4">
                   <Button asChild size="lg" className="rounded-full px-8 text-lg font-semibold shadow-xl shadow-primary/30">
@@ -73,7 +73,7 @@ export default function Home() {
         <section className="w-full py-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-headline font-bold mb-4">Heroic Capabilities</h2>
+              <h2 className="text-3xl font-headline font-bold mb-4">Elite Capabilities</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Equip yourself with the tools needed for mission success.
               </p>
@@ -120,7 +120,7 @@ export default function Home() {
             <div className="bg-primary p-1.5 rounded-lg text-white">
               <Shield className="h-5 w-5" />
             </div>
-            <span className="font-headline text-xl font-bold">Hero Party</span>
+            <span className="font-headline text-xl font-bold">The Pros</span>
           </div>
           <p className="text-sm text-muted-foreground">
             © 2026 Legend I s Born HQ. All rights reserved.
