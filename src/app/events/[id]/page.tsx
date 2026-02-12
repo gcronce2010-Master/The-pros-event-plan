@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, use } from 'react';
+import { useState, use, useEffect } from 'react';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -40,12 +41,15 @@ import {
   Trash2,
   Save,
   Zap,
-  ExternalLink
+  ExternalLink,
+  QrCode,
+  Share2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { suggestPartyTasks } from '@/ai/flows/suggest-party-tasks';
 import { draftGuestMessage } from '@/ai/flows/draft-guest-message';
 import { formatTimeTo12h } from '@/lib/utils';
+import { QRCodeSVG } from 'qrcode.react';
 
 // Mock data for initial state
 const MOCK_GUESTS = [
@@ -63,6 +67,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const { id } = use(params);
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
+  const [currentUrl, setCurrentUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
+  }, []);
   
   // Event state
   const [event, setEvent] = useState({
@@ -199,6 +210,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     return `https://www.mapquest.com/directions/to/${destination}`;
   };
 
+  const handleCopyLink = () => {
+    if (typeof navigator !== 'undefined') {
+      navigator.clipboard.writeText(currentUrl);
+      toast({
+        title: "Coordinates Copied",
+        description: "Invite link has been copied to your clipboard.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -214,6 +235,40 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="hidden sm:inline-flex border-primary text-primary font-bold">ACTIVE MISSION</Badge>
           
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Share2 className="h-5 w-5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Broadcast Mission</DialogTitle>
+                <DialogDescription>
+                  Share the coordinates with your allies.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl border-2 border-dashed border-primary/20 space-y-6">
+                <div className="p-4 bg-white rounded-2xl shadow-xl ring-1 ring-border">
+                  {currentUrl && <QRCodeSVG value={currentUrl} size={200} />}
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2">Scan to join</p>
+                  <p className="text-xs text-muted-foreground">Coordinates: {currentUrl.split('/').pop()}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="grid flex-1 gap-2">
+                  <Label htmlFor="link" className="sr-only">Link</Label>
+                  <Input id="link" defaultValue={currentUrl} readOnly className="rounded-full px-4" />
+                </div>
+                <Button size="sm" className="rounded-full px-4" onClick={handleCopyLink}>
+                  Copy Link
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={isSettingsOpen} onOpenChange={(open) => {
             setIsSettingsOpen(open);
             if (open) setEditEvent({ ...event });
@@ -361,9 +416,26 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                     <span className="text-sm text-muted-foreground">Open Objectives</span>
                     <span className="font-bold text-accent">{tasks.filter(t => !t.completed).length}</span>
                   </div>
-                  <Button className="w-full rounded-full shadow-md" onClick={() => setActiveTab('guests')}>
-                    Manage Roster
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="w-full rounded-full shadow-md flex items-center gap-2">
+                        <QrCode className="h-4 w-4" /> Share Coordinates
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[400px]">
+                      <DialogHeader>
+                        <DialogTitle className="text-center font-headline">Broadcast QR</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col items-center justify-center p-6 space-y-4">
+                        <div className="p-4 bg-white rounded-2xl shadow-xl ring-1 ring-border">
+                          {currentUrl && <QRCodeSVG value={currentUrl} size={220} />}
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center px-4 italic">
+                          Have your allies scan this code with their vision tech to access the mission briefing.
+                        </p>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             </div>

@@ -1,11 +1,23 @@
+
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Sparkles, PartyPopper, Shield, Zap, Sword, Users } from 'lucide-react';
+import { Sparkles, PartyPopper, Shield, Zap, Sword, Users, QrCode } from 'lucide-react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-party');
+  const [currentUrl, setCurrentUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.origin);
+    }
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -109,6 +121,17 @@ export default function Home() {
                 title="Legendary Memories"
                 description="Focus on the victory. We handle the logistical chaos so you can be the hero of the hour."
               />
+            </div>
+          </div>
+        </section>
+
+        {/* QR Section */}
+        <section className="w-full py-20 bg-primary/5">
+          <div className="container mx-auto px-4 flex flex-col items-center text-center">
+            <h2 className="text-3xl font-headline font-bold mb-6">Mobile HQ Activation</h2>
+            <p className="text-muted-foreground max-w-md mb-10">Scan to access your command center from any mobile device and manage your events on the go.</p>
+            <div className="bg-white p-6 rounded-[2rem] shadow-2xl ring-4 ring-primary/10 hover:scale-105 transition-transform">
+              {currentUrl && <QRCodeSVG value={currentUrl} size={180} />}
             </div>
           </div>
         </section>
