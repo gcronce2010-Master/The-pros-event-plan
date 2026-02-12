@@ -39,7 +39,8 @@ import {
   UserPlus,
   Trash2,
   Save,
-  Zap
+  Zap,
+  ExternalLink
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { suggestPartyTasks } from '@/ai/flows/suggest-party-tasks';
@@ -66,7 +67,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     name: "The Hero Assembly Gala",
     date: '2024-08-20',
     time: '8:00 PM',
-    location: 'Stark Tower, Penthouse',
+    location: 'Solitude Links, Smiths Creek, MI',
     theme: 'Cape and Mask',
     description: 'A night of celebration for our local protectors. Dress code: Your finest heroic attire.'
   });
@@ -180,6 +181,11 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     } catch (err) {
       toast({ title: "Error", description: "Comms failure", variant: "destructive" });
     }
+  };
+
+  const getMapQuestUrl = () => {
+    const destination = encodeURIComponent(event.location);
+    return `https://www.mapquest.com/directions/to/${destination}`;
   };
 
   return (
@@ -313,9 +319,14 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="bg-primary/10 p-2 rounded-lg text-primary"><MapPin className="h-5 w-5" /></div>
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Coordinates</p>
                         <p className="font-medium truncate">{event.location}</p>
+                        <Button asChild variant="link" size="sm" className="h-auto p-0 text-primary font-bold hover:no-underline flex items-center gap-1 mt-1">
+                          <a href={getMapQuestUrl()} target="_blank" rel="noopener noreferrer">
+                            Get MapQuest Directions <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </Button>
                       </div>
                     </div>
                   </div>
