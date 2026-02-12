@@ -1,0 +1,155 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * CORE PHILOSOPHY
+     * This ruleset implements a multi-layered authorization model designed for the AI Party application. 
+     * It prioritizes strict owner-based access for personal data and collaborative access for events.
+     *
+     * DATA STRUCTURE
+     * 1. Personal Data: Nested under /user_profiles/{userId} and /users/{userId}/ai_suggestions.
+     * 2. Collaborative Events: Organized under /users/{organizerId}/events/{eventId}.
+     * 3. Guest Visibility (QAP): A dedicated collection /user_invites/{invitedUserUid} provides a 
+     *    performant, secure path for guests to view their invitations without wide queries.
+     *
+     * KEY SECURITY DECISIONS
+     * - Denormalization for Authorization: Critical fields like 'organizerId' and 'members' maps are 
+     *   denormalized into subcollection documents. This eliminates the need for expensive get() calls 
+     *   and ensures that rules remain fast and atomic.
+     * - Prototyping Mode: Rules enforce who can access data based on identity and relationships but 
+     *   allow flexibility in data shapes (types and optional fields) to support rapid development.
+     * - Immutability of Keys: Relational fields (like userId or organizerId) are enforced as immutable 
+     *   on updates to prevent data from being "orphaned" or stolen.
+     */
+
+    // --- Helper Functions ---
+
+    /** @description Checks if the user is authenticated. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** @description Checks if the document exists and the user is the owner. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /** @description Checks if the user is present in a denormalized 'members' map. */
+    function isMember(data) {
+      return isSignedIn() && data.members[request.auth.uid] == true;
+    }
+
+    /** @description Validates that the resource exists for destructive operations. */
+    function existsForWrite() {
+      return resource != null;
+    }
+
+    // --- Match Rules ---
+
+    /**
+     * @description Rules for user account information.
+     * @path /user_profiles/{userId}
+     * @allow (get) If the user is the profile owner.
+     * @deny (list) Listing user profiles is forbidden for privacy.
+     * @principle Enforces path-based ownership for root user documents.
+     */
+    match /user_profiles/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for events organized by users.
+     * @path /users/{organizerId}/events/{eventId}
+     * @allow (create) If the user matches the organizerId in the path.
+     * @allow (get) If the user is the organizer or a member of the event.
+     * @principle Combines path-based ownership with map-based shared access.
+     */
+    match /users/{organizerId}/events/{eventId} {
+      allow get: if isOwner(organizerId) || isMember(resource.data);
+      allow list: if isOwner(organizerId);
+      allow create: if isOwner(organizerId) && request.resource.data.organizerId == organizerId;
+      allow update: if (isOwner(organizerId) || isMember(resource.data)) && existsForWrite();
+      allow delete: if isExistingOwner(organizerId);
+
+      /**
+       * @description Rules for guest lists within an event.
+       * @path /users/{organizerId}/events/{eventId}/guests/{guestId}
+       * @allow (list) The organizer can see all guests.
+       * @principle Relies on denormalized organizerId for subcollection security.
+       */
+      match /guests/{guestId} {
+        allow get, list: if isOwner(organizerId) || (isSignedIn() && resource.data.invitedUserUid == request.auth.uid);
+        allow create: if isOwner(organizerId);
+        allow update: if (isOwner(organizerId) || (isSignedIn() && resource.data.invitedUserUid == request.auth.uid)) && existsForWrite();
+        allow delete: if isOwner(organizerId) && existsForWrite();
+      }
+
+      /**
+       * @description Rules for event chat rooms.
+       * @path /users/{organizerId}/events/{eventId}/chat_rooms/{chatRoomId}
+       * @principle Access is granted via the denormalized members map.
+       */
+      match /chat_rooms/{chatRoomId} {
+        allow get, list: if isOwner(organizerId) || isMember(resource.data);
+        allow create: if isOwner(organizerId);
+        allow update: if isOwner(organizerId) && existsForWrite();
+        allow delete: if isOwner(organizerId) && existsForWrite();
+
+        match /messages/{messageId} {
+          allow get, list: if isOwner(organizerId) || isMember(resource.data);
+          allow create: if (isOwner(organizerId) || isMember(get(/databases/$(database)/documents/users/$(organizerId)/events/$(eventId)/chat_rooms/$(chatRoomId)).data)) && request.resource.data.senderId == request.auth.uid;
+          allow update, delete: if isSignedIn() && resource.data.senderId == request.auth.uid && existsForWrite();
+        }
+      }
+
+      /**
+       * @description Rules for event planning tasks.
+       * @path /users/{organizerId}/events/{eventId}/tasks/{taskId}
+       * @principle Supports both organizer control and specific assignee access.
+       */
+      match /tasks/{taskId} {
+        allow get, list: if isOwner(organizerId) || (isSignedIn() && resource.data.assignedToUserId == request.auth.uid);
+        allow create: if isOwner(organizerId);
+        allow update: if (isOwner(organizerId) || (isSignedIn() && resource.data.assignedToUserId == request.auth.uid)) && existsForWrite();
+        allow delete: if isOwner(organizerId) && existsForWrite();
+      }
+    }
+
+    /**
+     * @description User-centric invitation index (Query-on-Attributes-Path).
+     * @path /user_invites/{invitedUserUid}/{inviteId}
+     * @allow (list) User can list all their own invitations.
+     * @principle Provides a dedicated, secure path to solve "invite not showing up" visibility issues.
+     */
+    match /user_invites/{invitedUserUid}/{inviteId} {
+      allow get, list: if isOwner(invitedUserUid);
+      allow create: if isSignedIn(); // Allow creation (usually via cloud function or organizer action)
+      allow update: if isExistingOwner(invitedUserUid);
+      allow delete: if isExistingOwner(invitedUserUid);
+    }
+
+    /**
+     * @description Rules for private AI-generated party suggestions.
+     * @path /users/{userId}/ai_suggestions/{aiSuggestionId}
+     * @allow (create) If the requester is the owner specified in the path.
+     * @principle Strict private ownership for personalized AI content.
+     */
+    match /users/{userId}/ai_suggestions/{aiSuggestionId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+  }
+}

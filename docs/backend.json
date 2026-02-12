@@ -1,0 +1,537 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user account within the AI Party application, holding core user information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email"
+      ]
+    },
+    "Event": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Event",
+      "type": "object",
+      "description": "Represents an event organized by a user, containing all essential planning details.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Event entity."
+        },
+        "organizerId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who organized this event. (Relationship: UserProfile 1:N Event)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The title or name of the event."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the event, including purpose and atmosphere."
+        },
+        "date": {
+          "type": "string",
+          "description": "The scheduled date of the event.",
+          "format": "date"
+        },
+        "time": {
+          "type": "string",
+          "description": "The scheduled time of the event.",
+          "format": "time"
+        },
+        "location": {
+          "type": "string",
+          "description": "The physical or virtual location where the event will take place."
+        },
+        "theme": {
+          "type": "string",
+          "description": "The chosen theme for the event, often influenced by AI suggestions."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the event was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the event was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "organizerId",
+        "name",
+        "description",
+        "date",
+        "time",
+        "location",
+        "theme",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Guest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Guest",
+      "type": "object",
+      "description": "Represents an invited guest for a specific event, tracking their invitation and RSVP status. This entity addresses the 'invite' functionality.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this specific guest's invitation to an event."
+        },
+        "eventId": {
+          "type": "string",
+          "description": "Reference to the Event this guest is invited to. (Relationship: Event 1:N Guest)"
+        },
+        "inviteeEmail": {
+          "type": "string",
+          "description": "The email address of the invited guest.",
+          "format": "email"
+        },
+        "inviteeName": {
+          "type": "string",
+          "description": "The name of the invited guest, if provided during invitation or RSVP."
+        },
+        "rsvpStatus": {
+          "type": "string",
+          "description": "The RSVP status of the guest (e.g., 'Pending', 'Accepted', 'Declined', 'Maybe')."
+        },
+        "inviteLink": {
+          "type": "string",
+          "description": "A unique, shareable link for this specific guest's invitation.",
+          "format": "uri"
+        },
+        "invitedById": {
+          "type": "string",
+          "description": "Reference to the UserProfile who sent this invitation. (Relationship: UserProfile 1:N Guest)"
+        },
+        "dietaryNeeds": {
+          "type": "string",
+          "description": "Any specific dietary requirements or allergies provided by the guest."
+        },
+        "preferences": {
+          "type": "string",
+          "description": "General preferences or answers to custom questions from the event organizer, provided by the guest."
+        },
+        "invitedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the invitation was sent.",
+          "format": "date-time"
+        },
+        "respondedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the guest last updated their RSVP status.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "eventId",
+        "inviteeEmail",
+        "rsvpStatus",
+        "inviteLink",
+        "invitedById",
+        "invitedAt"
+      ]
+    },
+    "ChatRoom": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChatRoom",
+      "type": "object",
+      "description": "Represents a dedicated chat room for an event, facilitating real-time communication among participants.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ChatRoom entity."
+        },
+        "eventId": {
+          "type": "string",
+          "description": "Reference to the Event this chat room belongs to. (Relationship: Event 1:N ChatRoom)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the chat room was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "eventId",
+        "createdAt"
+      ]
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChatMessage",
+      "type": "object",
+      "description": "Represents a single message sent within an event's chat room.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ChatMessage entity."
+        },
+        "chatRoomId": {
+          "type": "string",
+          "description": "Reference to the ChatRoom where this message was sent. (Relationship: ChatRoom 1:N ChatMessage)"
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who sent this message. (Relationship: UserProfile 1:N ChatMessage)"
+        },
+        "content": {
+          "type": "string",
+          "description": "The actual text content of the message."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp indicating when the message was sent.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "chatRoomId",
+        "senderId",
+        "content",
+        "timestamp"
+      ]
+    },
+    "Task": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Task",
+      "type": "object",
+      "description": "Represents a planning task or to-do item associated with an event.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Task entity."
+        },
+        "eventId": {
+          "type": "string",
+          "description": "Reference to the Event this task is associated with. (Relationship: Event 1:N Task)"
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the task to be completed."
+        },
+        "assignedToUserId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who is assigned to complete this task. (Relationship: UserProfile 1:N Task)"
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The date by which the task is expected to be completed.",
+          "format": "date"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Boolean flag indicating whether the task has been completed."
+        },
+        "completedByUserId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who marked the task as completed. (Relationship: UserProfile 1:N Task)"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the task was marked as completed.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the task was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the task was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "eventId",
+        "description",
+        "completed",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AISuggestion": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AISuggestion",
+      "type": "object",
+      "description": "Stores a record of AI-generated suggestions for party themes, decor, and activities.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AISuggestion entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who requested this AI suggestion. (Relationship: UserProfile 1:N AISuggestion)"
+        },
+        "eventId": {
+          "type": "string",
+          "description": "Optional reference to the Event this suggestion was generated for or applied to. (Relationship: Event 1:N AISuggestion)"
+        },
+        "occasion": {
+          "type": "string",
+          "description": "The occasion for which the suggestion was generated (e.g., birthday, wedding, casual get-together)."
+        },
+        "guestCount": {
+          "type": "number",
+          "description": "The estimated number of guests provided for generating the suggestion."
+        },
+        "vibe": {
+          "type": "string",
+          "description": "The preferred vibe for the event (e.g., elegant, fun, relaxed, sophisticated) provided for generating the suggestion."
+        },
+        "suggestedThemes": {
+          "type": "array",
+          "description": "An array of suggested party themes generated by the AI.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "decorIdeas": {
+          "type": "array",
+          "description": "An array of ideas for event decorations generated by the AI.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "activityIdeas": {
+          "type": "array",
+          "description": "An array of ideas for activities at the event generated by the AI.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the AI suggestion was generated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "occasion",
+        "guestCount",
+        "vibe",
+        "suggestedThemes",
+        "decorIdeas",
+        "activityIdeas",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/user_profiles/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores individual user profiles. The document's 'id' field MUST match the '{userId}' path parameter (request.auth.uid) for direct authorization control. Only the authenticated user can read/write their own profile.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, corresponding to Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{organizerId}/events/{eventId}",
+        "definition": {
+          "entityName": "Event",
+          "schema": {
+            "$ref": "#/backend/entities/Event"
+          },
+          "description": "Represents an event organized by a specific user. The 'organizerId' field in the document MUST match the '{organizerId}' path parameter and 'request.auth.uid' for direct ownership control. This document also includes a 'members' map (e.g., { [uid]: true }) listing all authenticated user IDs (organizer and accepted guests) who have authorized access to this event's collaborative resources, enabling authorization independence for subcollections.",
+          "params": [
+            {
+              "name": "organizerId",
+              "description": "The unique identifier of the user who organized this event, corresponding to Firebase Authentication UID."
+            },
+            {
+              "name": "eventId",
+              "description": "The unique identifier for the event."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{organizerId}/events/{eventId}/guests/{guestId}",
+        "definition": {
+          "entityName": "Guest",
+          "schema": {
+            "$ref": "#/backend/entities/Guest"
+          },
+          "description": "Stores guest invitations specific to an event, managed by the organizer. Includes denormalized 'organizerId' (from the parent event) and 'invitedUserUid' (the UID of the invited user, if registered) for authorization independence. This is the primary record for organizers.",
+          "params": [
+            {
+              "name": "organizerId",
+              "description": "The unique identifier of the event organizer."
+            },
+            {
+              "name": "eventId",
+              "description": "The unique identifier for the event this guest is invited to."
+            },
+            {
+              "name": "guestId",
+              "description": "The unique identifier for this specific guest's invitation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/user_invites/{invitedUserUid}/{inviteId}",
+        "definition": {
+          "entityName": "Guest",
+          "schema": {
+            "$ref": "#/backend/entities/Guest"
+          },
+          "description": "A denormalized, user-centric view of guest invitations. This collection allows a registered user (whose UID matches '{invitedUserUid}') to efficiently list and manage their own invitations across all events. It copies essential data from the event-specific guest document (e.g., eventId, organizerId, rsvpStatus, inviteLink) and includes 'invitedUserUid' matching the path for authorization independence. This design supports QAP for invited users.",
+          "params": [
+            {
+              "name": "invitedUserUid",
+              "description": "The unique identifier of the invited user, corresponding to Firebase Authentication UID."
+            },
+            {
+              "name": "inviteId",
+              "description": "The unique identifier for this specific guest's invitation, corresponding to the 'guestId' from the event-centric collection."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{organizerId}/events/{eventId}/chat_rooms/{chatRoomId}",
+        "definition": {
+          "entityName": "ChatRoom",
+          "schema": {
+            "$ref": "#/backend/entities/ChatRoom"
+          },
+          "description": "Represents a chat room for a specific event. Includes denormalized 'organizerId' (from the parent event) and the 'members' map (from the parent event) for authorization independence, allowing access control for all participants without requiring a 'get()' call.",
+          "params": [
+            {
+              "name": "organizerId",
+              "description": "The unique identifier of the event organizer."
+            },
+            {
+              "name": "eventId",
+              "description": "The unique identifier for the event this chat room belongs to."
+            },
+            {
+              "name": "chatRoomId",
+              "description": "The unique identifier for the chat room."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{organizerId}/events/{eventId}/chat_rooms/{chatRoomId}/messages/{messageId}",
+        "definition": {
+          "entityName": "ChatMessage",
+          "schema": {
+            "$ref": "#/backend/entities/ChatMessage"
+          },
+          "description": "Represents a single message within an event's chat room. Includes denormalized 'organizerId' (from the event) and the 'members' map (from the chat room/event) for authorization independence. The 'senderId' also serves as a key authorization field.",
+          "params": [
+            {
+              "name": "organizerId",
+              "description": "The unique identifier of the event organizer."
+            },
+            {
+              "name": "eventId",
+              "description": "The unique identifier for the event this message belongs to."
+            },
+            {
+              "name": "chatRoomId",
+              "description": "The unique identifier for the chat room this message was sent in."
+            },
+            {
+              "name": "messageId",
+              "description": "The unique identifier for the chat message."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{organizerId}/events/{eventId}/tasks/{taskId}",
+        "definition": {
+          "entityName": "Task",
+          "schema": {
+            "$ref": "#/backend/entities/Task"
+          },
+          "description": "Represents a planning task associated with a specific event. Includes denormalized 'organizerId' (from the parent event) for authorization independence. The 'assignedToUserId' field allows for specific access control for task assignees.",
+          "params": [
+            {
+              "name": "organizerId",
+              "description": "The unique identifier of the event organizer."
+            },
+            {
+              "name": "eventId",
+              "description": "The unique identifier for the event this task belongs to."
+            },
+            {
+              "name": "taskId",
+              "description": "The unique identifier for the task."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/ai_suggestions/{aiSuggestionId}",
+        "definition": {
+          "entityName": "AISuggestion",
+          "schema": {
+            "$ref": "#/backend/entities/AISuggestion"
+          },
+          "description": "Stores AI-generated suggestions requested by a user. The 'userId' field in the document MUST match the '{userId}' path parameter and 'request.auth.uid' for direct ownership and authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who requested the AI suggestion."
+            },
+            {
+              "name": "aiSuggestionId",
+              "description": "The unique identifier for the AI suggestion."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure for the AI Party application is designed with a strong emphasis on Authorization Independence, Structural Segregation, and Access Modeling, as mandated by the core design principles. This approach aims to simplify security rules, ensure scalability, and enhance debuggability.\n\n**Authorization Independence (CRITICAL):** This principle is primarily achieved through extensive denormalization. For any subcollection document where access depends on a parent document's attributes (e.g., an Event's organizer or members), those critical authorization attributes are copied into the subcollection document itself. For example:\n*   `Event` documents (at `/users/{organizerId}/events/{eventId}`) will contain an `organizerId` field that matches the path, and a `members` map for collaborative access.\n*   `Guest` invitation documents (at `/users/{organizerId}/events/{eventId}/guests/{guestId}`) will denormalize `organizerId` from the parent event and `invitedUserUid` (the authenticated UID of the invited guest, if registered) for direct access control without requiring a `get()` call to the parent `Event` or `UserProfile`.\n*   `ChatRoom` documents (at `/users/{organizerId}/events/{eventId}/chat_rooms/{chatRoomId}`) will denormalize `organizerId` and the `members` map from the parent `Event`.\n*   `ChatMessage` documents (at `/users/{organizerId}/events/{eventId}/chat_rooms/{chatRoomId}/messages/{messageId}`) will denormalize `organizerId` and the `members` map from the parent `ChatRoom` (or directly from the Event).\n*   `Task` documents (at `/users/{organizerId}/events/{eventId}/tasks/{taskId}`) will denormalize `organizerId` from the parent `Event`.\nThis strategy ensures that any document can be authorized based solely on its own data and the `request.auth.uid`, eliminating expensive and complex `get()` calls in security rules and supporting atomic operations.\n\n**Structural Segregation (Homogeneous Security Posture):** Data with different access patterns is placed in separate collections or distinct hierarchical paths. For instance, user profiles are in `/user_profiles`, while user-owned events are under `/users/{organizerId}/events`. This simplifies security rules by ensuring all documents within a given collection or subcollection conform to a uniform security posture.\n\n**Access Modeling & QAPs (Rules are not Filters):**\n*   **Path-Based Ownership:** User-specific data and top-level user-owned entities (e.g., `Events`, `AISuggestions`) are structured under `/users/{userId}/...`. This inherently provides strong, simple ownership-based authorization where `request.auth.uid` must match the `{userId}` or `{organizerId}` wildcard in the path.\n*   **Collaborative Data (Events, Chat):** The `members` map denormalized into `Event` and `ChatRoom` documents facilitates access for invited guests. Security rules can efficiently check `request.auth.uid in resource.data.members`.\n*   **QAP for Guest Invitations:** To address the user's issue of 'invite not showing up' and to enable Query-on-Attributes-Paths (QAPs) for invited guests, a dedicated collection `/user_invites/{invitedUserUid}/{inviteId}` is introduced. This collection acts as an index/mirror for registered users' invitations. An invited user (`request.auth.uid == invitedUserUid`) can efficiently list their own invitations across all events without needing to perform inefficient collection group queries or wide-ranging filters on event-centric guest lists. This separation ensures that `list` operations for personal invites are secure and performant.\n\nThis structure ensures a robust foundation for security rules, making them explicit and easily debuggable, while maintaining scalability and performance for typical application queries."
+  }
+}
