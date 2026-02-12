@@ -34,11 +34,12 @@ import {
   ArrowLeft, 
   Calendar, 
   MapPin, 
-  Sparkles,
+  Shield,
   CheckCircle2,
   UserPlus,
   Trash2,
-  Save
+  Save,
+  Zap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { suggestPartyTasks } from '@/ai/flows/suggest-party-tasks';
@@ -46,14 +47,14 @@ import { draftGuestMessage } from '@/ai/flows/draft-guest-message';
 
 // Mock data for initial state
 const MOCK_GUESTS = [
-  { id: '1', name: 'Emily Smith', status: 'Attending', diet: 'Vegetarian' },
-  { id: '2', name: 'James Wilson', status: 'Maybe', diet: 'None' },
-  { id: '3', name: 'Sarah Parker', status: 'Pending', diet: 'Gluten Free' },
+  { id: '1', name: 'Tony Stark', status: 'Attending', diet: 'Cheeseburgers' },
+  { id: '2', name: 'Bruce Banner', status: 'Maybe', diet: 'None' },
+  { id: '3', name: 'Diana Prince', status: 'Pending', diet: 'Greek Cuisine' },
 ];
 
 const MOCK_MESSAGES = [
-  { id: '1', sender: 'Organizer', text: "Hey everyone! Can't wait for the party.", time: '10:00 AM' },
-  { id: '2', sender: 'Emily Smith', text: "Me too! Should I bring anything?", time: '10:05 AM' },
+  { id: '1', sender: 'Coordinator', text: "Avengers, assemble for the celebration!", time: '10:00 AM' },
+  { id: '2', sender: 'Tony Stark', text: "I'll bring the tech. Who's got the food?", time: '10:05 AM' },
 ];
 
 export default function EventDetailPage({ params }: { params: { id: string } }) {
@@ -62,12 +63,12 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   
   // Event state
   const [event, setEvent] = useState({
-    name: "Alex's 30th Birthday Bash",
-    date: '2024-06-15',
-    time: '7:00 PM',
-    location: 'Rooftop Garden, Downtown',
-    theme: 'Retro Neon',
-    description: 'A night of vibrant colors and 80s beats to celebrate Alex hitting the big 3-0!'
+    name: "The Hero Assembly Gala",
+    date: '2024-08-20',
+    time: '8:00 PM',
+    location: 'Stark Tower, Penthouse',
+    theme: 'Cape and Mask',
+    description: 'A night of celebration for our local protectors. Dress code: Your finest heroic attire.'
   });
 
   const [tasks, setTasks] = useState<{description: string, timeline: string, completed: boolean}[]>([]);
@@ -95,8 +96,8 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     setEvent(editEvent);
     setIsSettingsOpen(false);
     toast({ 
-      title: "Event Updated", 
-      description: "Logistics and details have been updated successfully." 
+      title: "Mission Briefing Updated", 
+      description: "Event logistics have been modified." 
     });
   };
 
@@ -104,14 +105,14 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     setLoadingTasks(true);
     try {
       const result = await suggestPartyTasks({
-        eventType: "Birthday Party",
+        eventType: "Hero Gala",
         theme: event.theme,
         eventDate: new Date(event.date).toISOString(),
       });
       setTasks(result.tasks.map(t => ({ ...t, completed: false })));
-      toast({ title: "Tasks generated", description: "AI has suggested a planning timeline for you." });
+      toast({ title: "Strategy Generated", description: "AI has provided a heroic planning timeline." });
     } catch (err) {
-      toast({ title: "Error", description: "Failed to generate tasks", variant: "destructive" });
+      toast({ title: "Error", description: "Tactical failure: Failed to generate tasks", variant: "destructive" });
     } finally {
       setLoadingTasks(false);
     }
@@ -126,7 +127,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     setNewTaskDesc('');
     setNewTaskTimeline('1 week before');
     setIsAddTaskOpen(false);
-    toast({ title: "Task added", description: "Your new task has been added to the checklist." });
+    toast({ title: "Objective Added", description: "New task assigned to the mission." });
   };
 
   const handleDeleteTask = (index: number) => {
@@ -148,14 +149,14 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     setNewGuestStatus('Pending');
     setNewGuestDiet('');
     setIsInviteOpen(false);
-    toast({ title: "Guest invited", description: `${newGuestName} has been added to the list.` });
+    toast({ title: "Ally Recruited", description: `${newGuestName} has been added to the roster.` });
   };
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
     setChatMessages([...chatMessages, {
       id: Date.now().toString(),
-      sender: 'Organizer',
+      sender: 'Coordinator',
       text: message,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }]);
@@ -163,7 +164,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   };
 
   const handleAiMessageDraft = async () => {
-    toast({ title: "AI Thinking...", description: "Drafting a welcoming message for you." });
+    toast({ title: "Analyzing Data...", description: "Drafting a heroic transmission." });
     try {
       const result = await draftGuestMessage({
         eventName: event.name,
@@ -177,7 +178,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       });
       setMessage(result.draftedMessage);
     } catch (err) {
-      toast({ title: "Error", description: "Failed to draft message", variant: "destructive" });
+      toast({ title: "Error", description: "Comms failure", variant: "destructive" });
     }
   };
 
@@ -189,10 +190,12 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           <Link href="/dashboard"><ArrowLeft className="h-5 w-5" /></Link>
         </Button>
         <div className="flex-1 min-w-0">
-          <h1 className="font-headline font-bold truncate text-xl">{event.name}</h1>
+          <h1 className="font-headline font-bold truncate text-xl flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" /> {event.name}
+          </h1>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="hidden sm:inline-flex">Organizing</Badge>
+          <Badge variant="outline" className="hidden sm:inline-flex border-primary text-primary font-bold">ACTIVE MISSION</Badge>
           
           <Dialog open={isSettingsOpen} onOpenChange={(open) => {
             setIsSettingsOpen(open);
@@ -205,14 +208,14 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Event Settings</DialogTitle>
+                <DialogTitle>Mission Parameters</DialogTitle>
                 <DialogDescription>
-                  Update the logistical details for your celebration.
+                  Modify the logistical data for your assembly.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="event-name">Event Name</Label>
+                  <Label htmlFor="event-name">Mission Name</Label>
                   <Input 
                     id="event-name" 
                     value={editEvent.name}
@@ -220,7 +223,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="event-theme">Theme</Label>
+                  <Label htmlFor="event-theme">Visual Theme</Label>
                   <Input 
                     id="event-theme" 
                     value={editEvent.theme}
@@ -229,7 +232,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="event-date">Date</Label>
+                    <Label htmlFor="event-date">Activation Date</Label>
                     <Input 
                       id="event-date" 
                       type="date"
@@ -238,7 +241,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="event-time">Time</Label>
+                    <Label htmlFor="event-time">Activation Time</Label>
                     <Input 
                       id="event-time" 
                       type="time"
@@ -248,7 +251,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="event-location">Location</Label>
+                  <Label htmlFor="event-location">Coordinates</Label>
                   <Input 
                     id="event-location" 
                     value={editEvent.location}
@@ -256,7 +259,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="event-description">Description</Label>
+                  <Label htmlFor="event-description">Mission Brief</Label>
                   <Textarea 
                     id="event-description" 
                     value={editEvent.description}
@@ -267,7 +270,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               <DialogFooter>
                 <Button onClick={handleUpdateEvent} className="rounded-full">
                   <Save className="h-4 w-4 mr-2" />
-                  Save Changes
+                  Save Parameters
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -277,24 +280,26 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
       <main className="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 space-y-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 lg:w-fit rounded-full p-1 h-12">
-            <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>
-            <TabsTrigger value="tasks" className="rounded-full">Tasks</TabsTrigger>
-            <TabsTrigger value="guests" className="rounded-full">Guests</TabsTrigger>
-            <TabsTrigger value="chat" className="rounded-full">Chat</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 lg:w-fit rounded-full p-1 h-12 bg-secondary/50">
+            <TabsTrigger value="overview" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Brief</TabsTrigger>
+            <TabsTrigger value="tasks" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Objectives</TabsTrigger>
+            <TabsTrigger value="guests" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Allies</TabsTrigger>
+            <TabsTrigger value="chat" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Comms</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="animate-fade-in space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="md:col-span-2 shadow-sm border-none ring-1 ring-border">
+              <Card className="md:col-span-2 shadow-lg border-2 border-primary/10">
                 <CardHeader>
-                  <CardTitle className="font-headline">The Details</CardTitle>
+                  <CardTitle className="font-headline flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-accent fill-current" /> Tactical Intel
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="flex items-start gap-4 p-4 rounded-2xl bg-secondary/30">
-                    <Sparkles className="h-6 w-6 text-primary shrink-0 mt-1" />
+                  <div className="flex items-start gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                    <Shield className="h-6 w-6 text-primary shrink-0 mt-1" />
                     <div>
-                      <h3 className="font-bold">Theme: {event.theme}</h3>
+                      <h3 className="font-bold text-lg">Visual Identity: {event.theme}</h3>
                       <p className="text-sm text-muted-foreground">{event.description}</p>
                     </div>
                   </div>
@@ -302,14 +307,14 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                     <div className="flex items-center gap-3">
                       <div className="bg-primary/10 p-2 rounded-lg text-primary"><Calendar className="h-5 w-5" /></div>
                       <div>
-                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Date & Time</p>
+                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Launch Window</p>
                         <p className="font-medium">{event.date} @ {event.time}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="bg-primary/10 p-2 rounded-lg text-primary"><MapPin className="h-5 w-5" /></div>
                       <div>
-                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Location</p>
+                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Coordinates</p>
                         <p className="font-medium truncate">{event.location}</p>
                       </div>
                     </div>
@@ -317,25 +322,25 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 </CardContent>
               </Card>
 
-              <Card className="shadow-sm border-none ring-1 ring-border">
+              <Card className="shadow-lg border-2 border-primary/10">
                 <CardHeader>
-                  <CardTitle className="font-headline">Quick Stats</CardTitle>
+                  <CardTitle className="font-headline">Mission Stats</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-sm text-muted-foreground">Total Invited</span>
+                    <span className="text-sm text-muted-foreground">Recruited</span>
                     <span className="font-bold">{guests.length}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-sm text-muted-foreground">Attending</span>
+                    <span className="text-sm text-muted-foreground">Ready</span>
                     <span className="font-bold text-green-600">{guests.filter(g => g.status === 'Attending').length}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-sm text-muted-foreground">Tasks Pending</span>
+                    <span className="text-sm text-muted-foreground">Open Objectives</span>
                     <span className="font-bold text-accent">{tasks.filter(t => !t.completed).length}</span>
                   </div>
-                  <Button className="w-full rounded-full" onClick={() => setActiveTab('guests')}>
-                    Manage Guests
+                  <Button className="w-full rounded-full shadow-md" onClick={() => setActiveTab('guests')}>
+                    Manage Roster
                   </Button>
                 </CardContent>
               </Card>
@@ -344,49 +349,49 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
           <TabsContent value="tasks" className="animate-fade-in space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-headline font-bold">Planning Checklist</h2>
+              <h2 className="text-2xl font-headline font-bold">Mission Objectives</h2>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleGenerateTasks} disabled={loadingTasks} className="rounded-full">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {tasks.length > 0 ? 'Regenerate' : 'Suggest Tasks'}
+                <Button variant="outline" size="sm" onClick={handleGenerateTasks} disabled={loadingTasks} className="rounded-full border-primary text-primary hover:bg-primary/5">
+                  <Zap className="h-4 w-4 mr-2" />
+                  {tasks.length > 0 ? 'Recalculate' : 'Generate Intel'}
                 </Button>
                 
                 <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" className="rounded-full">
+                    <Button size="sm" className="rounded-full shadow-md">
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Task
+                      Add Objective
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                      <DialogTitle>Add New Task</DialogTitle>
+                      <DialogTitle>New Mission Task</DialogTitle>
                       <DialogDescription>
-                        Add a task to your planning checklist.
+                        Define a new tactical requirement.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="task-desc">Task Description</Label>
+                        <Label htmlFor="task-desc">Objective Description</Label>
                         <Input 
                           id="task-desc" 
-                          placeholder="e.g., Order the cake" 
+                          placeholder="e.g., Secure the vibranium" 
                           value={newTaskDesc}
                           onChange={(e) => setNewTaskDesc(e.target.value)}
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="task-timeline">Timeline</Label>
+                        <Label htmlFor="task-timeline">Deadline Window</Label>
                         <Input 
                           id="task-timeline" 
-                          placeholder="e.g., 2 weeks before" 
+                          placeholder="e.g., T-minus 2 weeks" 
                           value={newTaskTimeline}
                           onChange={(e) => setNewTaskTimeline(e.target.value)}
                         />
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button onClick={handleAddTask} disabled={!newTaskDesc.trim()}>Create Task</Button>
+                      <Button onClick={handleAddTask} disabled={!newTaskDesc.trim()}>Deploy Task</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -396,7 +401,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
             {tasks.length > 0 ? (
               <div className="grid gap-4">
                 {tasks.map((task, i) => (
-                  <Card key={i} className="shadow-sm border-none ring-1 ring-border group hover:ring-primary/40 transition-all">
+                  <Card key={i} className="shadow-md border-none ring-1 ring-border group hover:ring-primary/40 transition-all bg-white">
                     <CardContent className="flex items-center gap-4 py-4">
                       <button 
                         onClick={() => {
@@ -404,13 +409,13 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                           newTasks[i].completed = !newTasks[i].completed;
                           setTasks(newTasks);
                         }}
-                        className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${task.completed ? 'bg-primary border-primary text-white' : 'border-muted-foreground/30 hover:border-primary'}`}
+                        className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-muted-foreground/30 hover:border-primary'}`}
                       >
                         {task.completed && <CheckCircle2 className="h-4 w-4" />}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>{task.description}</p>
-                        <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mt-1">{task.timeline}</p>
+                        <p className={`font-bold ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{task.description}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-widest font-black mt-1">{task.timeline}</p>
                       </div>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button 
@@ -427,12 +432,12 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 bg-secondary/20 rounded-3xl border-2 border-dashed border-primary/10">
-                <ClipboardList className="h-12 w-12 text-muted-foreground/40 mb-4" />
-                <p className="text-muted-foreground mb-6">No tasks added yet. Want some help?</p>
-                <Button onClick={handleGenerateTasks} className="rounded-full shadow-lg shadow-primary/10">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  AI Planning Assistant
+              <div className="flex flex-col items-center justify-center py-20 bg-secondary/10 rounded-3xl border-4 border-dotted border-primary/20">
+                <ClipboardList className="h-12 w-12 text-primary/30 mb-4" />
+                <p className="text-muted-foreground font-medium mb-6">No objectives detected. Need a tactical plan?</p>
+                <Button onClick={handleGenerateTasks} className="rounded-full shadow-lg">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Request AI Strategy
                 </Button>
               </div>
             )}
@@ -440,84 +445,84 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
           <TabsContent value="guests" className="animate-fade-in space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-headline font-bold">Guest List</h2>
+              <h2 className="text-2xl font-headline font-bold">The Roster</h2>
               
               <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm" className="rounded-full">
+                  <Button size="sm" className="rounded-full shadow-md">
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Invite Guest
+                    Recruit Ally
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
-                    <DialogTitle>Invite New Guest</DialogTitle>
+                    <DialogTitle>Recruitment Form</DialogTitle>
                     <DialogDescription>
-                      Add a guest to your event's tracking list.
+                      Add a hero or ally to the assembly.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="guest-name">Guest Name</Label>
+                      <Label htmlFor="guest-name">Hero Name / Secret Identity</Label>
                       <Input 
                         id="guest-name" 
-                        placeholder="e.g., Emily Smith" 
+                        placeholder="e.g., Peter Parker" 
                         value={newGuestName}
                         onChange={(e) => setNewGuestName(e.target.value)}
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="guest-status">RSVP Status</Label>
+                      <Label htmlFor="guest-status">Readiness Status</Label>
                       <Select value={newGuestStatus} onValueChange={setNewGuestStatus}>
                         <SelectTrigger id="guest-status">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Attending">Attending</SelectItem>
-                          <SelectItem value="Maybe">Maybe</SelectItem>
-                          <SelectItem value="Pending">Pending</SelectItem>
-                          <SelectItem value="Declined">Declined</SelectItem>
+                          <SelectItem value="Attending">READY</SelectItem>
+                          <SelectItem value="Maybe">RESERVE</SelectItem>
+                          <SelectItem value="Pending">STANDBY</SelectItem>
+                          <SelectItem value="Declined">OFF-WORLD</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="guest-diet">Dietary Info</Label>
+                      <Label htmlFor="guest-diet">Special Requirements</Label>
                       <Input 
                         id="guest-diet" 
-                        placeholder="e.g., Vegan, Nut Allergy" 
+                        placeholder="e.g., Gluten-Free, Nut Allergy" 
                         value={newGuestDiet}
                         onChange={(e) => setNewGuestDiet(e.target.value)}
                       />
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleInviteGuest} disabled={!newGuestName.trim()}>Add to List</Button>
+                    <Button onClick={handleInviteGuest} disabled={!newGuestName.trim()}>Authorize Recruitment</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
 
-            <Card className="shadow-sm border-none ring-1 ring-border">
+            <Card className="shadow-lg border-2 border-primary/10 overflow-hidden">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b bg-secondary/10">
-                        <th className="px-6 py-4 font-headline font-bold text-sm">Guest Name</th>
-                        <th className="px-6 py-4 font-headline font-bold text-sm">Status</th>
-                        <th className="px-6 py-4 font-headline font-bold text-sm">Dietary Info</th>
-                        <th className="px-6 py-4 font-headline font-bold text-sm text-right">Actions</th>
+                      <tr className="border-b bg-primary/5">
+                        <th className="px-6 py-4 font-headline font-black text-sm uppercase tracking-tighter">Ally</th>
+                        <th className="px-6 py-4 font-headline font-black text-sm uppercase tracking-tighter">Status</th>
+                        <th className="px-6 py-4 font-headline font-black text-sm uppercase tracking-tighter">Intel / Diet</th>
+                        <th className="px-6 py-4 font-headline font-black text-sm uppercase tracking-tighter text-right">Ops</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
                       {guests.map((guest) => (
-                        <tr key={guest.id} className="hover:bg-secondary/5 transition-colors">
+                        <tr key={guest.id} className="hover:bg-primary/5 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                              <div className="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center font-black shadow-inner">
                                 {guest.name.charAt(0)}
                               </div>
-                              <span className="font-medium">{guest.name}</span>
+                              <span className="font-black text-foreground">{guest.name}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -525,21 +530,21 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                               guest.status === 'Attending' ? 'default' : 
                               guest.status === 'Maybe' ? 'secondary' : 
                               guest.status === 'Declined' ? 'destructive' : 'outline'
-                            }>
-                              {guest.status}
+                            } className="font-black">
+                              {guest.status.toUpperCase()}
                             </Badge>
                           </td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">
+                          <td className="px-6 py-4 text-sm font-medium text-muted-foreground">
                             {guest.diet}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="rounded-full text-destructive hover:bg-destructive/10"
+                              className="rounded-full text-destructive hover:bg-destructive/10 font-bold"
                               onClick={() => setGuests(guests.filter(g => g.id !== guest.id))}
                             >
-                              Remove
+                              EXCLUDE
                             </Button>
                           </td>
                         </tr>
@@ -552,25 +557,27 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           </TabsContent>
 
           <TabsContent value="chat" className="animate-fade-in">
-            <Card className="shadow-lg border-none ring-1 ring-border flex flex-col h-[600px] overflow-hidden">
-              <CardHeader className="border-b px-6 py-4 flex flex-row items-center justify-between">
+            <Card className="shadow-2xl border-2 border-primary/20 flex flex-col h-[600px] overflow-hidden bg-white">
+              <CardHeader className="border-b px-6 py-4 flex flex-row items-center justify-between bg-primary text-white">
                 <div>
-                  <CardTitle className="font-headline text-lg">Event Chat</CardTitle>
-                  <CardDescription>Plan details with your guests</CardDescription>
+                  <CardTitle className="font-headline text-lg flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" /> Secure Comms Channel
+                  </CardTitle>
+                  <CardDescription className="text-primary-foreground/80">Encrypted tactical coordination</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" className="rounded-full" onClick={handleAiMessageDraft}>
-                  <Sparkles className="h-4 w-4 mr-2 text-primary" />
-                  AI Draft
+                <Button variant="outline" size="sm" className="rounded-full bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleAiMessageDraft}>
+                  <Zap className="h-4 w-4 mr-2" />
+                  AI Protocol
                 </Button>
               </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto p-6 space-y-6 bg-secondary/5">
+              <CardContent className="flex-1 overflow-y-auto p-6 space-y-6 bg-secondary/10">
                 {chatMessages.map((msg) => (
-                  <div key={msg.id} className={`flex flex-col ${msg.sender === 'Organizer' ? 'items-end' : 'items-start'}`}>
+                  <div key={msg.id} className={`flex flex-col ${msg.sender === 'Coordinator' ? 'items-end' : 'items-start'}`}>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-bold text-muted-foreground">{msg.sender}</span>
+                      <span className="text-xs font-black text-primary uppercase">{msg.sender}</span>
                       <span className="text-[10px] text-muted-foreground/60">{msg.time}</span>
                     </div>
-                    <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm shadow-sm ${msg.sender === 'Organizer' ? 'bg-primary text-white rounded-tr-none' : 'bg-white text-foreground rounded-tl-none ring-1 ring-border'}`}>
+                    <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-md font-medium ${msg.sender === 'Coordinator' ? 'bg-primary text-white rounded-tr-none' : 'bg-white text-foreground rounded-tl-none border-2 border-primary/10'}`}>
                       {msg.text}
                     </div>
                   </div>
@@ -579,13 +586,13 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               <div className="p-4 border-t bg-white">
                 <div className="flex gap-2">
                   <Input 
-                    placeholder="Type a message..." 
-                    className="rounded-full px-6" 
+                    placeholder="Broadcast to the team..." 
+                    className="rounded-full px-6 border-2 focus:ring-primary" 
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   />
-                  <Button size="icon" className="rounded-full h-10 w-10 shadow-md" onClick={handleSendMessage}>
+                  <Button size="icon" className="rounded-full h-10 w-10 shadow-lg" onClick={handleSendMessage}>
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>

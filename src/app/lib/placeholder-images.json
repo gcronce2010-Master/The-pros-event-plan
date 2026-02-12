@@ -1,29 +1,28 @@
-
 {
   "placeholderImages": [
     {
       "id": "hero-party",
-      "description": "A futuristic tech party with neon lights and digital interfaces.",
-      "imageUrl": "https://picsum.photos/seed/tech-party-neon/1200/600",
-      "imageHint": "tech party"
+      "description": "A grand assembly of heroes in a high-tech command center.",
+      "imageUrl": "https://picsum.photos/seed/superhero-hq/1200/600",
+      "imageHint": "superhero headquarters"
     },
     {
       "id": "birthday-theme",
-      "description": "A colorful birthday setup with balloons and cake.",
-      "imageUrl": "https://picsum.photos/seed/ai-party-2/800/600",
-      "imageHint": "birthday party"
+      "description": "A superhero-themed birthday party with masks and capes.",
+      "imageUrl": "https://picsum.photos/seed/hero-birthday/800/600",
+      "imageHint": "superhero party"
     },
     {
       "id": "dinner-theme",
-      "description": "An elegant dinner table setup with candles.",
-      "imageUrl": "https://picsum.photos/seed/ai-party-3/800/600",
-      "imageHint": "dinner party"
+      "description": "A sleek, justice-league style conference table setup.",
+      "imageUrl": "https://picsum.photos/seed/hero-meeting/800/600",
+      "imageHint": "futuristic meeting"
     },
     {
       "id": "garden-theme",
-      "description": "An outdoor garden party with fairy lights.",
-      "imageUrl": "https://picsum.photos/seed/ai-party-4/800/600",
-      "imageHint": "garden party"
+      "description": "An outdoor gala under a starry night sky with a hero signal.",
+      "imageUrl": "https://picsum.photos/seed/hero-gala/800/600",
+      "imageHint": "night gala"
     }
   ]
 }
