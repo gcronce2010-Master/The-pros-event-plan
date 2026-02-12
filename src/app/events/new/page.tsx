@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { brainstormPartyTheme, type BrainstormPartyThemeOutput } from '@/ai/flows/brainstorm-party-theme';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser, useAuth } from '@/firebase';
-import { collection, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, serverTimestamp } from 'firebase/firestore';
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 
@@ -25,10 +25,9 @@ export default function NewEventPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    occasion: '',
+    name: '',
     guestCount: 20,
     vibe: '',
-    name: '',
     date: '',
     time: '',
     location: '',
@@ -44,10 +43,10 @@ export default function NewEventPage() {
   }, [user, isUserLoading, auth]);
 
   const handleBrainstorm = async () => {
-    if (!formData.occasion || !formData.vibe) {
+    if (!formData.name || !formData.vibe) {
       toast({
         title: "Missing Information",
-        description: "Please provide an occasion and vibe for the AI to brainstorm ideas.",
+        description: "Please provide an event name and vibe for the AI to brainstorm ideas.",
         variant: "destructive",
       });
       return;
@@ -55,8 +54,9 @@ export default function NewEventPage() {
 
     setLoading(true);
     try {
+      // We pass the name as the 'occasion' to the AI flow
       const result = await brainstormPartyTheme({
-        occasion: formData.occasion,
+        occasion: formData.name,
         guestCount: formData.guestCount,
         vibe: formData.vibe,
       });
@@ -74,7 +74,8 @@ export default function NewEventPage() {
   };
 
   const selectTheme = (theme: string) => {
-    setFormData({ ...formData, name: `${formData.occasion}: ${theme}`, vibe: formData.vibe });
+    // Keep the original name but note the theme
+    setFormData({ ...formData, description: `Theme: ${theme}. ${formData.description}` });
     setStep(3);
   };
 
@@ -92,7 +93,7 @@ export default function NewEventPage() {
         date: formData.date,
         time: formData.time,
         location: formData.location,
-        theme: aiSuggestions?.theme || 'Custom',
+        theme: aiSuggestions?.theme || 'Heroic Custom',
         members: { [user.uid]: true },
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -101,14 +102,14 @@ export default function NewEventPage() {
       addDocumentNonBlocking(eventsRef, eventData);
       
       toast({
-        title: "Event Created!",
-        description: "Redirecting to your new event dashboard...",
+        title: "Mission Activated!",
+        description: "Redirecting to your command center...",
       });
       router.push('/dashboard');
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save event.",
+        description: "Failed to save mission data.",
         variant: "destructive",
       });
     } finally {
@@ -129,8 +130,8 @@ export default function NewEventPage() {
       <div className="max-w-4xl w-full">
         <header className="mb-8 text-center">
           <PartyPopper className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h1 className="text-3xl font-headline font-bold mb-2">Plan Something Amazing</h1>
-          <p className="text-muted-foreground">Let's start with the basics, or let our AI inspire you.</p>
+          <h1 className="text-3xl font-headline font-bold mb-2">Assemble Your Event</h1>
+          <p className="text-muted-foreground">Every great mission starts with a name and a vision.</p>
         </header>
 
         <div className="flex justify-center mb-8 gap-4">
@@ -145,21 +146,21 @@ export default function NewEventPage() {
         {step === 1 && (
           <Card className="shadow-xl border-none ring-1 ring-border animate-slide-up">
             <CardHeader>
-              <CardTitle className="font-headline">Step 1: The Basics</CardTitle>
-              <CardDescription>Tell us about the occasion you're celebrating.</CardDescription>
+              <CardTitle className="font-headline">Step 1: The Concept</CardTitle>
+              <CardDescription>Give your mission a name and set the tactical vibe.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>What's the occasion?</Label>
+                  <Label>Event Name</Label>
                   <Input 
-                    placeholder="e.g., 30th Birthday, Wedding Anniversary" 
-                    value={formData.occasion}
-                    onChange={(e) => setFormData({...formData, occasion: e.target.value})}
+                    placeholder="e.g., Alex's 30th Birthday Bash" 
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Estimated Guests</Label>
+                  <Label>Estimated Squad Size</Label>
                   <Input 
                     type="number" 
                     value={formData.guestCount}
@@ -168,9 +169,9 @@ export default function NewEventPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>What's the vibe?</Label>
+                <Label>Desired Vibe</Label>
                 <Input 
-                  placeholder="e.g., Casual backyard, Elegant black-tie, Fun neon disco" 
+                  placeholder="e.g., Cyberpunk, Retro-Futuristic, High-Stakes Gala" 
                   value={formData.vibe}
                   onChange={(e) => setFormData({...formData, vibe: e.target.value})}
                 />
@@ -195,7 +196,7 @@ export default function NewEventPage() {
                 className="rounded-full py-6 border-2"
                 disabled={loading}
               >
-                Skip to Manual Planning
+                Skip to Logistics
               </Button>
             </CardFooter>
           </Card>
@@ -203,20 +204,20 @@ export default function NewEventPage() {
 
         {step === 2 && aiSuggestions && (
           <div className="space-y-6 animate-slide-up">
-            <h2 className="text-2xl font-headline font-bold text-center">AI Suggestions for your {formData.occasion}</h2>
+            <h2 className="text-2xl font-headline font-bold text-center">Tactical Intel for: {formData.name}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card 
                 className="cursor-pointer hover:ring-2 hover:ring-primary transition-all shadow-md group border-none"
                 onClick={() => selectTheme(aiSuggestions.theme)}
               >
                 <CardHeader className="bg-primary/5">
-                  <CardTitle className="text-primary font-headline">The Theme</CardTitle>
+                  <CardTitle className="text-primary font-headline">Recommended Theme</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <h3 className="text-2xl font-bold mb-4">{aiSuggestions.theme}</h3>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">Decor Ideas</h4>
+                      <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">Visual Decryption</h4>
                       <ul className="list-disc list-inside space-y-1 text-sm">
                         {aiSuggestions.decorIdeas.slice(0, 3).map((idea, i) => (
                           <li key={i}>{idea}</li>
@@ -226,20 +227,20 @@ export default function NewEventPage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full rounded-full">Select This Theme</Button>
+                  <Button className="w-full rounded-full">Adopt This Strategy</Button>
                 </CardFooter>
               </Card>
 
               <div className="space-y-6">
                 <Card className="border-none shadow-md">
                   <CardHeader>
-                    <CardTitle className="font-headline text-accent">Activity Ideas</CardTitle>
+                    <CardTitle className="font-headline text-accent">Engagement Protocols</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-3">
                       {aiSuggestions.activityIdeas.map((activity, i) => (
                         <li key={i} className="flex gap-2 items-start text-sm">
-                          <div className="h-5 w-5 rounded-full bg-accent/10 text-accent flex items-center justify-center shrink-0 mt-0.5">
+                          <div className="h-5 w-5 rounded-full bg-accent/10 text-accent flex items-center justify-center shrink-0 mt-0.5 font-bold">
                             {i+1}
                           </div>
                           <span>{activity}</span>
@@ -249,7 +250,7 @@ export default function NewEventPage() {
                   </CardContent>
                 </Card>
                 <Button variant="ghost" className="w-full" onClick={() => setStep(1)}>
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Re-brainstorm
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Refine Concept
                 </Button>
               </div>
             </div>
@@ -259,8 +260,8 @@ export default function NewEventPage() {
         {step === 3 && (
           <Card className="shadow-xl border-none ring-1 ring-border animate-slide-up">
             <CardHeader>
-              <CardTitle className="font-headline">Step 3: Event Details</CardTitle>
-              <CardDescription>Fill in the logistical details for your guests.</CardDescription>
+              <CardTitle className="font-headline">Step 3: Final Deployment</CardTitle>
+              <CardDescription>Verify the coordinates and activation window.</CardDescription>
             </CardHeader>
             <form onSubmit={handleFinalSubmit}>
               <CardContent className="space-y-4">
@@ -275,7 +276,7 @@ export default function NewEventPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Calendar className="h-4 w-4 text-primary" /> Date</Label>
+                    <Label className="flex items-center gap-2 font-bold"><Calendar className="h-4 w-4 text-primary" /> Date</Label>
                     <Input 
                       type="date" 
                       value={formData.date}
@@ -284,7 +285,7 @@ export default function NewEventPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Time</Label>
+                    <Label className="font-bold">Time</Label>
                     <Input 
                       type="time" 
                       value={formData.time}
@@ -294,18 +295,18 @@ export default function NewEventPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> Location</Label>
+                  <Label className="flex items-center gap-2 font-bold"><MapPin className="h-4 w-4 text-primary" /> Coordinates / Venue</Label>
                   <Input 
-                    placeholder="Enter an address or venue name" 
+                    placeholder="Enter the HQ address or venue name" 
                     value={formData.location}
                     onChange={(e) => setFormData({...formData, location: e.target.value})}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Description (Optional)</Label>
+                  <Label className="font-bold">Mission Briefing (Optional)</Label>
                   <Textarea 
-                    placeholder="What should your guests know?" 
+                    placeholder="What should your allies know?" 
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                   />
@@ -315,8 +316,8 @@ export default function NewEventPage() {
                 <Button variant="outline" type="button" onClick={() => setStep(aiSuggestions ? 2 : 1)} className="flex-1 rounded-full">
                   Back
                 </Button>
-                <Button type="submit" className="flex-[2] rounded-full shadow-lg shadow-primary/20" disabled={loading}>
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Create Event <ArrowRight className="ml-2 h-4 w-4" /></>}
+                <Button type="submit" className="flex-[2] rounded-full shadow-lg shadow-primary/20 font-bold" disabled={loading}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Launch Mission <ArrowRight className="ml-2 h-4 w-4" /></>}
                 </Button>
               </CardFooter>
             </form>
