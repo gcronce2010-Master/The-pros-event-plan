@@ -3,9 +3,9 @@
   "placeholderImages": [
     {
       "id": "hero-party",
-      "description": "A vibrant celebration with people dancing and confetti.",
-      "imageUrl": "https://picsum.photos/seed/ai-party-1/1200/600",
-      "imageHint": "party celebration"
+      "description": "A futuristic tech party with neon lights and digital interfaces.",
+      "imageUrl": "https://picsum.photos/seed/tech-party-neon/1200/600",
+      "imageHint": "tech party"
     },
     {
       "id": "birthday-theme",
