@@ -58,9 +58,6 @@ export default function Home() {
                   <Button asChild size="lg" className="rounded-full px-8 text-lg font-semibold shadow-xl shadow-primary/30">
                     <Link href="/events/new">Create New Event</Link>
                   </Button>
-                  <Button variant="outline" size="lg" className="rounded-full px-8 text-lg border-2 border-primary text-primary hover:bg-primary/5">
-                    View Dossier
-                  </Button>
                 </div>
               </div>
               <div className="relative aspect-video lg:aspect-square overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(30,64,175,0.3)] animate-fade-in group border-4 border-white">
