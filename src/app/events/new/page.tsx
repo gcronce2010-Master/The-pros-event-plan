@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,10 +10,18 @@ import { Sparkles, Calendar, MapPin, Users, PartyPopper, ArrowRight, ArrowLeft, 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { brainstormPartyTheme, type BrainstormPartyThemeOutput } from '@/ai/flows/brainstorm-party-theme';
 import { useToast } from '@/hooks/use-toast';
+import { useFirestore, useUser, useAuth } from '@/firebase';
+import { collection, doc, serverTimestamp } from 'firebase/firestore';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 
 export default function NewEventPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  const auth = useAuth();
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,6 +36,12 @@ export default function NewEventPage() {
   });
 
   const [aiSuggestions, setAiSuggestions] = useState<BrainstormPartyThemeOutput | null>(null);
+
+  useEffect(() => {
+    if (!isUserLoading && !user && auth) {
+      initiateAnonymousSignIn(auth);
+    }
+  }, [user, isUserLoading, auth]);
 
   const handleBrainstorm = async () => {
     if (!formData.occasion || !formData.vibe) {
@@ -61,19 +74,55 @@ export default function NewEventPage() {
   };
 
   const selectTheme = (theme: string) => {
-    setFormData({ ...formData, name: `${formData.occasion}: ${theme}` });
+    setFormData({ ...formData, name: `${formData.occasion}: ${theme}`, vibe: formData.vibe });
     setStep(3);
   };
 
-  const handleFinalSubmit = (e: React.FormEvent) => {
+  const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate saving
-    toast({
-      title: "Event Created!",
-      description: "Redirecting to your new event dashboard...",
-    });
-    router.push('/dashboard');
+    if (!user || !firestore) return;
+
+    setLoading(true);
+    try {
+      const eventsRef = collection(firestore, 'users', user.uid, 'events');
+      const eventData = {
+        organizerId: user.uid,
+        name: formData.name,
+        description: formData.description,
+        date: formData.date,
+        time: formData.time,
+        location: formData.location,
+        theme: aiSuggestions?.theme || 'Custom',
+        members: { [user.uid]: true },
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      addDocumentNonBlocking(eventsRef, eventData);
+      
+      toast({
+        title: "Event Created!",
+        description: "Redirecting to your new event dashboard...",
+      });
+      router.push('/dashboard');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save event.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (isUserLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 flex items-center justify-center">
@@ -114,7 +163,7 @@ export default function NewEventPage() {
                   <Input 
                     type="number" 
                     value={formData.guestCount}
-                    onChange={(e) => setFormData({...formData, guestCount: parseInt(e.target.value)})}
+                    onChange={(e) => setFormData({...formData, guestCount: parseInt(e.target.value) || 0})}
                   />
                 </div>
               </div>
@@ -266,8 +315,8 @@ export default function NewEventPage() {
                 <Button variant="outline" type="button" onClick={() => setStep(aiSuggestions ? 2 : 1)} className="flex-1 rounded-full">
                   Back
                 </Button>
-                <Button type="submit" className="flex-[2] rounded-full shadow-lg shadow-primary/20">
-                  Create Event <ArrowRight className="ml-2 h-4 w-4" />
+                <Button type="submit" className="flex-[2] rounded-full shadow-lg shadow-primary/20" disabled={loading}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Create Event <ArrowRight className="ml-2 h-4 w-4" /></>}
                 </Button>
               </CardFooter>
             </form>

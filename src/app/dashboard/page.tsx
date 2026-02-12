@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, MapPin, Users, ChevronRight, PartyPopper, Clock, Settings, User, LogOut, CreditCard } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, ChevronRight, PartyPopper, Clock, Settings, User, LogOut, CreditCard, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -17,37 +17,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from '@/hooks/use-toast';
-
-const mockEvents = [
-  {
-    id: '1',
-    name: "Alex's 30th Birthday Bash",
-    date: "2024-06-15",
-    time: "7:00 PM",
-    location: "Rooftop Garden, Downtown",
-    theme: "Retro Neon",
-    guestCount: 45,
-    rsvpCount: 32,
-    status: "Planning",
-    image: PlaceHolderImages[0].imageUrl
-  },
-  {
-    id: '2',
-    name: "Summer Solstice Garden Party",
-    date: "2024-06-21",
-    time: "4:00 PM",
-    location: "Sunnybrook Park",
-    theme: "Bohemian Picnic",
-    guestCount: 25,
-    rsvpCount: 18,
-    status: "Upcoming",
-    image: PlaceHolderImages[3].imageUrl
-  }
-];
+import { useFirestore, useUser, useCollection, useMemoFirebase, useAuth } from '@/firebase';
+import { collection, query, where, orderBy } from 'firebase/firestore';
+import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 
 export default function DashboardPage() {
-  const [events] = useState(mockEvents);
   const { toast } = useToast();
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  const auth = useAuth();
+
+  useEffect(() => {
+    if (!isUserLoading && !user && auth) {
+      initiateAnonymousSignIn(auth);
+    }
+  }, [user, isUserLoading, auth]);
+
+  const eventsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(
+      collection(firestore, 'users', user.uid, 'events'),
+      orderBy('createdAt', 'desc')
+    );
+  }, [firestore, user]);
+
+  const { data: events, isLoading: isEventsLoading } = useCollection(eventsQuery);
 
   const handleSettingsClick = (item: string) => {
     toast({
@@ -56,9 +50,16 @@ export default function DashboardPage() {
     });
   };
 
+  if (isUserLoading || isEventsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Dashboard Nav */}
       <header className="px-6 h-16 flex items-center border-b bg-white/50 backdrop-blur-md sticky top-0 z-40">
         <Link className="flex items-center gap-2" href="/">
           <div className="bg-primary p-1.5 rounded-lg text-white">
@@ -111,24 +112,24 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">Manage your upcoming celebrations and planning tasks.</p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="px-4 py-1.5 rounded-full">Total: {events.length}</Badge>
+            <Badge variant="outline" className="px-4 py-1.5 rounded-full">Total: {events?.length || 0}</Badge>
           </div>
         </div>
 
-        {events.length > 0 ? (
+        {events && events.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
               <Card key={event.id} className="overflow-hidden group hover:shadow-xl transition-all border-none shadow-md ring-1 ring-border">
                 <div className="relative h-48 w-full overflow-hidden">
                   <Image 
-                    src={event.image} 
+                    src={PlaceHolderImages[0].imageUrl} 
                     alt={event.name} 
                     fill 
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute top-3 left-3">
                     <Badge className="bg-white/90 text-primary hover:bg-white backdrop-blur-sm border-none shadow-sm font-semibold">
-                      {event.status}
+                      Upcoming
                     </Badge>
                   </div>
                 </div>
@@ -151,10 +152,6 @@ export default function DashboardPage() {
                     <MapPin className="h-4 w-4 text-primary/70" />
                     <span className="truncate">{event.location}</span>
                   </div>
-                  <div className="flex items-center text-sm text-muted-foreground gap-2">
-                    <Users className="h-4 w-4 text-primary/70" />
-                    <span>{event.rsvpCount} / {event.guestCount} RSVPs</span>
-                  </div>
                 </CardContent>
                 <CardFooter className="pt-0">
                   <Button asChild className="w-full rounded-xl bg-secondary text-primary hover:bg-primary hover:text-white transition-all group/btn shadow-none border border-primary/10">
@@ -167,7 +164,6 @@ export default function DashboardPage() {
               </Card>
             ))}
             
-            {/* Create New Card */}
             <Link 
               href="/events/new" 
               className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary/20 rounded-3xl bg-primary/5 hover:bg-primary/10 hover:border-primary/40 transition-all group"
