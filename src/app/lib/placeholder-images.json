@@ -1,10 +1,11 @@
+
 {
   "placeholderImages": [
     {
       "id": "hero-party",
-      "description": "A grand assembly of heroes in a high-tech command center.",
-      "imageUrl": "https://picsum.photos/seed/superhero-hq/1200/600",
-      "imageHint": "superhero headquarters"
+      "description": "The Incredible Hulk roaring in a tech-filled superhero headquarters.",
+      "imageUrl": "https://picsum.photos/seed/hulk-hero/1200/600",
+      "imageHint": "hulk monster superhero"
     },
     {
       "id": "birthday-theme",
