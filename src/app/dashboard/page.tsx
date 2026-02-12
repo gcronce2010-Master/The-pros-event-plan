@@ -3,11 +3,20 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, MapPin, Users, ChevronRight, PartyPopper, Clock } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, ChevronRight, PartyPopper, Clock, Settings, User, LogOut, CreditCard } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from '@/hooks/use-toast';
 
 const mockEvents = [
   {
@@ -38,6 +47,14 @@ const mockEvents = [
 
 export default function DashboardPage() {
   const [events] = useState(mockEvents);
+  const { toast } = useToast();
+
+  const handleSettingsClick = (item: string) => {
+    toast({
+      title: `${item} Settings`,
+      description: `This feature is coming soon in the next update!`,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,6 +72,35 @@ export default function DashboardPage() {
               <Plus className="mr-2 h-4 w-4" /> New Event
             </Link>
           </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Settings className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleSettingsClick('Profile')}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSettingsClick('Billing')}>
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>Billing</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSettingsClick('Settings')}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Preferences</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

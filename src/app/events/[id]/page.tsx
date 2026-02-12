@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Dialog,
   DialogContent,
@@ -23,7 +24,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/select";
 import { 
   MessageSquare, 
   ClipboardList, 
@@ -36,7 +37,8 @@ import {
   Sparkles,
   CheckCircle2,
   UserPlus,
-  Trash2
+  Trash2,
+  Save
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { suggestPartyTasks } from '@/ai/flows/suggest-party-tasks';
@@ -57,6 +59,17 @@ const MOCK_MESSAGES = [
 export default function EventDetailPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Event state
+  const [event, setEvent] = useState({
+    name: "Alex's 30th Birthday Bash",
+    date: '2024-06-15',
+    time: '7:00 PM',
+    location: 'Rooftop Garden, Downtown',
+    theme: 'Retro Neon',
+    description: 'A night of vibrant colors and 80s beats to celebrate Alex hitting the big 3-0!'
+  });
+
   const [tasks, setTasks] = useState<{description: string, timeline: string, completed: boolean}[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [message, setMessage] = useState('');
@@ -74,13 +87,17 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   const [newGuestStatus, setNewGuestStatus] = useState('Pending');
   const [newGuestDiet, setNewGuestDiet] = useState('');
 
-  const event = {
-    name: "Alex's 30th Birthday Bash",
-    date: '2024-06-15',
-    time: '7:00 PM',
-    location: 'Rooftop Garden, Downtown',
-    theme: 'Retro Neon',
-    description: 'A night of vibrant colors and 80s beats to celebrate Alex hitting the big 3-0!'
+  // Settings Dialog State
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [editEvent, setEditEvent] = useState({ ...event });
+
+  const handleUpdateEvent = () => {
+    setEvent(editEvent);
+    setIsSettingsOpen(false);
+    toast({ 
+      title: "Event Updated", 
+      description: "Logistics and details have been updated successfully." 
+    });
   };
 
   const handleGenerateTasks = async () => {
@@ -176,7 +193,85 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="hidden sm:inline-flex">Organizing</Badge>
-          <Button variant="ghost" size="icon" className="rounded-full"><Settings className="h-5 w-5" /></Button>
+          
+          <Dialog open={isSettingsOpen} onOpenChange={(open) => {
+            setIsSettingsOpen(open);
+            if (open) setEditEvent({ ...event });
+          }}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Settings className="h-5 w-5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Event Settings</DialogTitle>
+                <DialogDescription>
+                  Update the logistical details for your celebration.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="event-name">Event Name</Label>
+                  <Input 
+                    id="event-name" 
+                    value={editEvent.name}
+                    onChange={(e) => setEditEvent({...editEvent, name: e.target.value})}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="event-theme">Theme</Label>
+                  <Input 
+                    id="event-theme" 
+                    value={editEvent.theme}
+                    onChange={(e) => setEditEvent({...editEvent, theme: e.target.value})}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="event-date">Date</Label>
+                    <Input 
+                      id="event-date" 
+                      type="date"
+                      value={editEvent.date}
+                      onChange={(e) => setEditEvent({...editEvent, date: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="event-time">Time</Label>
+                    <Input 
+                      id="event-time" 
+                      type="time"
+                      value={editEvent.time}
+                      onChange={(e) => setEditEvent({...editEvent, time: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="event-location">Location</Label>
+                  <Input 
+                    id="event-location" 
+                    value={editEvent.location}
+                    onChange={(e) => setEditEvent({...editEvent, location: e.target.value})}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="event-description">Description</Label>
+                  <Textarea 
+                    id="event-description" 
+                    value={editEvent.description}
+                    onChange={(e) => setEditEvent({...editEvent, description: e.target.value})}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={handleUpdateEvent} className="rounded-full">
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </header>
 
