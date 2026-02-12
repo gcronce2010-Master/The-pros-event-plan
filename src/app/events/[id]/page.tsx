@@ -10,6 +10,16 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { 
   MessageSquare, 
   Users, 
   ClipboardList, 
@@ -22,7 +32,8 @@ import {
   Sparkles,
   CheckCircle2,
   MoreVertical,
-  UserPlus
+  UserPlus,
+  Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { suggestPartyTasks } from '@/ai/flows/suggest-party-tasks';
@@ -48,6 +59,11 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   const [message, setMessage] = useState('');
   const [chatMessages, setChatMessages] = useState(MOCK_MESSAGES);
   const [guests, setGuests] = useState(MOCK_GUESTS);
+  
+  // Add Task State
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [newTaskDesc, setNewTaskDesc] = useState('');
+  const [newTaskTimeline, setNewTaskTimeline] = useState('1 week before');
 
   const event = {
     name: "Alex's 30th Birthday Bash",
@@ -72,6 +88,24 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     } finally {
       setLoadingTasks(false);
     }
+  };
+
+  const handleAddTask = () => {
+    if (!newTaskDesc.trim()) return;
+    setTasks([
+      ...tasks, 
+      { description: newTaskDesc, timeline: newTaskTimeline, completed: false }
+    ]);
+    setNewTaskDesc('');
+    setNewTaskTimeline('1 week before');
+    setIsAddTaskOpen(false);
+    toast({ title: "Task added", description: "Your new task has been added to the checklist." });
+  };
+
+  const handleDeleteTask = (index: number) => {
+    const newTasks = [...tasks];
+    newTasks.splice(index, 1);
+    setTasks(newTasks);
   };
 
   const handleSendMessage = () => {
@@ -195,10 +229,46 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                   <Sparkles className="h-4 w-4 mr-2" />
                   {tasks.length > 0 ? 'Regenerate with AI' : 'Suggest Tasks'}
                 </Button>
-                <Button size="sm" className="rounded-full">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Task
-                </Button>
+                
+                <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="rounded-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Task
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New Task</DialogTitle>
+                      <DialogDescription>
+                        Manually add a task to your planning checklist.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="task-desc">Task Description</Label>
+                        <Input 
+                          id="task-desc" 
+                          placeholder="e.g., Order the cake" 
+                          value={newTaskDesc}
+                          onChange={(e) => setNewTaskDesc(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="task-timeline">Timeline</Label>
+                        <Input 
+                          id="task-timeline" 
+                          placeholder="e.g., 2 weeks before" 
+                          value={newTaskTimeline}
+                          onChange={(e) => setNewTaskTimeline(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button onClick={handleAddTask} disabled={!newTaskDesc.trim()}>Create Task</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
 
@@ -221,9 +291,16 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                         <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>{task.description}</p>
                         <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mt-1">{task.timeline}</p>
                       </div>
-                      <Button variant="ghost" size="icon" className="rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="rounded-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDeleteTask(i)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
