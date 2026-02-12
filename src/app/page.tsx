@@ -123,7 +123,7 @@ export default function Home() {
             <span className="font-headline text-xl font-bold">The Pros</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2026 Legend I s Born HQ. All rights reserved.
+            © 2026 The Pros. All rights reserved.
           </p>
           <nav className="flex gap-4 sm:gap-6">
             <Link className="text-sm hover:underline underline-offset-4" href="#">
