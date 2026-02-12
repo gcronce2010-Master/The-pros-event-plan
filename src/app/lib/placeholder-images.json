@@ -1,0 +1,29 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-party",
+      "description": "A vibrant celebration with people dancing and confetti.",
+      "imageUrl": "https://picsum.photos/seed/ai-party-1/1200/600",
+      "imageHint": "party celebration"
+    },
+    {
+      "id": "birthday-theme",
+      "description": "A colorful birthday setup with balloons and cake.",
+      "imageUrl": "https://picsum.photos/seed/ai-party-2/800/600",
+      "imageHint": "birthday party"
+    },
+    {
+      "id": "dinner-theme",
+      "description": "An elegant dinner table setup with candles.",
+      "imageUrl": "https://picsum.photos/seed/ai-party-3/800/600",
+      "imageHint": "dinner party"
+    },
+    {
+      "id": "garden-theme",
+      "description": "An outdoor garden party with fairy lights.",
+      "imageUrl": "https://picsum.photos/seed/ai-party-4/800/600",
+      "imageHint": "garden party"
+    }
+  ]
+}
