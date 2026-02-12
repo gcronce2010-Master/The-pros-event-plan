@@ -45,6 +45,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { suggestPartyTasks } from '@/ai/flows/suggest-party-tasks';
 import { draftGuestMessage } from '@/ai/flows/draft-guest-message';
+import { formatTimeTo12h } from '@/lib/utils';
 
 // Mock data for initial state
 const MOCK_GUESTS = [
@@ -54,8 +55,8 @@ const MOCK_GUESTS = [
 ];
 
 const MOCK_MESSAGES = [
-  { id: '1', sender: 'Coordinator', text: "Avengers, assemble for the celebration!", time: '10:00 AM' },
-  { id: '2', sender: 'Tony Stark', text: "I'll bring the tech. Who's got the food?", time: '10:05 AM' },
+  { id: '1', sender: 'Coordinator', text: "Avengers, assemble for the celebration!", time: '10:00 AM EST' },
+  { id: '2', sender: 'Tony Stark', text: "I'll bring the tech. Who's got the food?", time: '10:05 AM EST' },
 ];
 
 export default function EventDetailPage({ params }: { params: { id: string } }) {
@@ -66,7 +67,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   const [event, setEvent] = useState({
     name: "The Hero Assembly Gala",
     date: '2024-08-20',
-    time: '8:00 PM',
+    time: '20:00', // Using 24h format for internal storage/input, formatTimeTo12h for display
     location: 'Solitude Links, Smiths Creek, MI',
     theme: 'Cape and Mask',
     description: 'A night of celebration for our local protectors. Dress code: Your finest heroic attire.'
@@ -155,11 +156,20 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
+    
+    // Explicitly use 12-hour format and New York time zone for EST
+    const timestamp = new Date().toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: true,
+      timeZone: 'America/New_York' 
+    });
+
     setChatMessages([...chatMessages, {
       id: Date.now().toString(),
       sender: 'Coordinator',
       text: message,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      time: `${timestamp} EST`
     }]);
     setMessage('');
   };
@@ -170,7 +180,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       const result = await draftGuestMessage({
         eventName: event.name,
         eventDate: event.date,
-        eventTime: event.time,
+        eventTime: formatTimeTo12h(event.time),
         eventLocation: event.location,
         eventTheme: event.theme,
         eventDescription: event.description,
@@ -314,7 +324,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                       <div className="bg-primary/10 p-2 rounded-lg text-primary"><Calendar className="h-5 w-5" /></div>
                       <div>
                         <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Launch Window</p>
-                        <p className="font-medium">{event.date} @ {event.time}</p>
+                        <p className="font-medium">{event.date} @ {formatTimeTo12h(event.time)}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">

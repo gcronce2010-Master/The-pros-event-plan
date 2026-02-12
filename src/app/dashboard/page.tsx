@@ -18,8 +18,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser, useCollection, useMemoFirebase, useAuth } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy } from 'firebase/firestore';
 import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
+import { formatTimeTo12h } from '@/lib/utils';
 
 export default function DashboardPage() {
   const { toast } = useToast();
@@ -146,7 +147,7 @@ export default function DashboardPage() {
                     <Calendar className="h-4 w-4 text-primary/70" />
                     <span>{event.date}</span>
                     <Clock className="h-4 w-4 text-primary/70 ml-2" />
-                    <span>{event.time}</span>
+                    <span>{formatTimeTo12h(event.time)}</span>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground gap-2">
                     <MapPin className="h-4 w-4 text-primary/70" />
