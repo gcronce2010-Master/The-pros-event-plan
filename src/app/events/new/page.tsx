@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -154,7 +155,7 @@ export default function NewEventPage() {
                 <div className="space-y-2">
                   <Label>Event Name</Label>
                   <Input 
-                    placeholder="e.g., Alex's 30th Birthday Bash" 
+                    placeholder="e.g., Grants 50th Birthday Bash" 
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
