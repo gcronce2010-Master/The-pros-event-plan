@@ -43,7 +43,7 @@ export interface FirebaseServicesAndUser {
 }
 
 // Return type for useUser() - specific to user auth state
-export interface UserHookResult { // Renamed from UserAuthHookResult for consistency if desired, or keep as UserAuthHookResult
+export interface UserHookResult { 
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
@@ -154,15 +154,28 @@ export const useFirebaseApp = (): FirebaseApp => {
   return firebaseApp;
 };
 
-type MemoFirebase <T> = T & {__memo?: boolean};
+// Internal registry for memoized Firebase objects to avoid mutating frozen instances
+const firebaseMemoRegistry = new WeakSet<object>();
 
-export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | (MemoFirebase<T>) {
+/**
+ * Safely memoizes a Firebase object and tracks it for verification in hooks.
+ */
+export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T {
   const memoized = useMemo(factory, deps);
   
-  if(typeof memoized !== 'object' || memoized === null) return memoized;
-  (memoized as MemoFirebase<T>).__memo = true;
+  if (memoized && typeof memoized === 'object') {
+    firebaseMemoRegistry.add(memoized);
+  }
   
   return memoized;
+}
+
+/**
+ * Internal utility to verify if a Firebase object was memoized.
+ */
+export function isFirebaseMemoized(obj: any): boolean {
+  if (!obj || typeof obj !== 'object') return true; // null/undefined is technically stable if handled
+  return firebaseMemoRegistry.has(obj);
 }
 
 /**
@@ -170,7 +183,7 @@ export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | 
  * This provides the User object, loading status, and any auth errors.
  * @returns {UserHookResult} Object with user, isUserLoading, userError.
  */
-export const useUser = (): UserHookResult => { // Renamed from useAuthUser
+export const useUser = (): UserHookResult => { 
   const { user, isUserLoading, userError } = useFirebase(); // Leverages the main hook
   return { user, isUserLoading, userError };
 };
