@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'The Pros - Plan Smarter, Celebrate Better',
+  title: 'The Pros Event Plan - Plan Smarter, Celebrate Better',
   description: 'Elite party planning and management for unforgettable events.',
 };
 

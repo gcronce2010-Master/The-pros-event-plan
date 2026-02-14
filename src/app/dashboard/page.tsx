@@ -66,7 +66,7 @@ export default function DashboardPage() {
           <div className="bg-primary p-1.5 rounded-lg text-white">
             <PartyPopper className="h-5 w-5" />
           </div>
-          <span className="font-headline font-bold text-xl">The Pros</span>
+          <span className="font-headline font-bold text-xl">The Pros Event Plan</span>
         </Link>
         <div className="ml-auto flex items-center gap-4">
           <Button asChild variant="default" size="sm" className="rounded-full">
