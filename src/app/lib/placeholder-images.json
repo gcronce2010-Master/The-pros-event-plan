@@ -3,27 +3,27 @@
   "placeholderImages": [
     {
       "id": "hero-party",
-      "description": "The Incredible Hulk roaring in a tech-filled superhero headquarters.",
-      "imageUrl": "https://picsum.photos/seed/hulk-hero/1200/600",
-      "imageHint": "hulk monster superhero"
+      "description": "A sophisticated high-end corporate gala with elegant lighting.",
+      "imageUrl": "https://picsum.photos/seed/pro-gala/1200/600",
+      "imageHint": "luxury gala"
     },
     {
       "id": "birthday-theme",
-      "description": "A superhero-themed birthday party with masks and capes.",
-      "imageUrl": "https://picsum.photos/seed/hero-birthday/800/600",
-      "imageHint": "superhero party"
+      "description": "An elegant adult birthday celebration with gold and black decor.",
+      "imageUrl": "https://picsum.photos/seed/pro-birthday/800/600",
+      "imageHint": "elegant birthday"
     },
     {
       "id": "dinner-theme",
-      "description": "A sleek, justice-league style conference table setup.",
-      "imageUrl": "https://picsum.photos/seed/hero-meeting/800/600",
-      "imageHint": "futuristic meeting"
+      "description": "A luxury dinner table setting with fine china and candles.",
+      "imageUrl": "https://picsum.photos/seed/pro-dinner/800/600",
+      "imageHint": "luxury dinner"
     },
     {
       "id": "garden-theme",
-      "description": "An outdoor gala under a starry night sky with a hero signal.",
-      "imageUrl": "https://picsum.photos/seed/hero-gala/800/600",
-      "imageHint": "night gala"
+      "description": "A beautiful outdoor garden party with fairy lights at dusk.",
+      "imageUrl": "https://picsum.photos/seed/pro-garden/800/600",
+      "imageHint": "garden party"
     }
   ]
 }
