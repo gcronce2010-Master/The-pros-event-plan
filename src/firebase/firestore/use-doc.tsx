@@ -10,19 +10,14 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { isFirebaseMemoized } from '@/firebase/provider';
+import { isFirebaseMemoized } from '@/firebase/memo';
 
-/** Utility type to add an 'id' field to a given type T. */
 type WithId<T> = T & { id: string };
 
-/**
- * Interface for the return value of the useDoc hook.
- * @template T Type of the document data.
- */
 export interface UseDocResult<T> {
-  data: WithId<T> | null; // Document data with ID, or null.
-  isLoading: boolean;       // True if loading.
-  error: FirestoreError | Error | null; // Error object, or null.
+  data: WithId<T> | null;
+  isLoading: boolean;
+  error: FirestoreError | Error | null;
 }
 
 /**
@@ -31,9 +26,7 @@ export interface UseDocResult<T> {
 export function useDoc<T = any>(
   memoizedDocRef: DocumentReference<DocumentData> | null | undefined,
 ): UseDocResult<T> {
-  type StateDataType = WithId<T> | null;
-
-  const [data, setData] = useState<StateDataType>(null);
+  const [data, setData] = useState<WithId<T> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
@@ -59,7 +52,7 @@ export function useDoc<T = any>(
         setError(null);
         setIsLoading(false);
       },
-      (error: FirestoreError) => {
+      (err: FirestoreError) => {
         const contextualError = new FirestorePermissionError({
           operation: 'get',
           path: memoizedDocRef.path,
@@ -68,7 +61,6 @@ export function useDoc<T = any>(
         setError(contextualError);
         setData(null);
         setIsLoading(false);
-
         errorEmitter.emit('permission-error', contextualError);
       }
     );
@@ -77,7 +69,7 @@ export function useDoc<T = any>(
   }, [memoizedDocRef]);
 
   if (memoizedDocRef && !isFirebaseMemoized(memoizedDocRef)) {
-    throw new Error('Firestore document reference was not properly memoized using useMemoFirebase. This can lead to infinite loops and high Firestore costs.');
+    console.warn('Firestore document reference was not properly memoized using useMemoFirebase.');
   }
 
   return { data, isLoading, error };

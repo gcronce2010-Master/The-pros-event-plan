@@ -11,24 +11,16 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { isFirebaseMemoized } from '@/firebase/provider';
+import { isFirebaseMemoized } from '@/firebase/memo';
 
-/** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
 
-/**
- * Interface for the return value of the useCollection hook.
- * @template T Type of the document data.
- */
 export interface UseCollectionResult<T> {
-  data: WithId<T>[] | null; // Document data with ID, or null.
-  isLoading: boolean;       // True if loading.
-  error: FirestoreError | Error | null; // Error object, or null.
+  data: WithId<T>[] | null;
+  isLoading: boolean;
+  error: FirestoreError | Error | null;
 }
 
-/* Internal implementation of Query:
-  https://github.com/firebase/firebase-js-sdk/blob/c5f08a9bc5da0d2b0207802c972d53724ccef055/packages/firestore/src/lite-api/reference.ts#L143
-*/
 export interface InternalQuery extends Query<DocumentData> {
   _query?: {
     path?: {
@@ -40,20 +32,16 @@ export interface InternalQuery extends Query<DocumentData> {
 
 /**
  * React hook to subscribe to a Firestore collection or query in real-time.
- * Handles nullable references/queries.
  */
 export function useCollection<T = any>(
-    memoizedTargetRefOrQuery: (CollectionReference<DocumentData> | Query<DocumentData>) | null | undefined,
+    memoizedTarget: (CollectionReference<DocumentData> | Query<DocumentData>) | null | undefined,
 ): UseCollectionResult<T> {
-  type ResultItemType = WithId<T>;
-  type StateDataType = ResultItemType[] | null;
-
-  const [data, setData] = useState<StateDataType>(null);
+  const [data, setData] = useState<WithId<T>[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
-    if (!memoizedTargetRefOrQuery) {
+    if (!memoizedTarget) {
       setData(null);
       setIsLoading(false);
       setError(null);
@@ -64,23 +52,19 @@ export function useCollection<T = any>(
     setError(null);
 
     const unsubscribe = onSnapshot(
-      memoizedTargetRefOrQuery,
+      memoizedTarget,
       (snapshot: QuerySnapshot<DocumentData>) => {
-        const results: ResultItemType[] = [];
-        for (const doc of snapshot.docs) {
-          results.push({ ...(doc.data() as T), id: doc.id });
-        }
+        const results = snapshot.docs.map(doc => ({ ...(doc.data() as T), id: doc.id }));
         setData(results);
         setError(null);
         setIsLoading(false);
       },
-      (error: FirestoreError) => {
-        // Robust path extraction
+      (err: FirestoreError) => {
         let path = 'unknown-collection';
-        if (memoizedTargetRefOrQuery.type === 'collection') {
-          path = (memoizedTargetRefOrQuery as CollectionReference).path;
+        if (memoizedTarget.type === 'collection') {
+          path = (memoizedTarget as CollectionReference).path;
         } else {
-          const internal = memoizedTargetRefOrQuery as unknown as InternalQuery;
+          const internal = memoizedTarget as unknown as InternalQuery;
           path = internal._query?.path?.canonicalString?.() || internal._query?.path?.toString?.() || 'unknown-query';
         }
 
@@ -92,16 +76,15 @@ export function useCollection<T = any>(
         setError(contextualError);
         setData(null);
         setIsLoading(false);
-
         errorEmitter.emit('permission-error', contextualError);
       }
     );
 
     return () => unsubscribe();
-  }, [memoizedTargetRefOrQuery]);
+  }, [memoizedTarget]);
 
-  if (memoizedTargetRefOrQuery && !isFirebaseMemoized(memoizedTargetRefOrQuery)) {
-    throw new Error('Firestore reference or query was not properly memoized using useMemoFirebase. This can lead to infinite loops and high Firestore costs.');
+  if (memoizedTarget && !isFirebaseMemoized(memoizedTarget)) {
+    console.warn('Firestore reference or query was not properly memoized using useMemoFirebase.');
   }
 
   return { data, isLoading, error };
