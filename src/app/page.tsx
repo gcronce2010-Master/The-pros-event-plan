@@ -29,12 +29,9 @@ export default function Home() {
           <span className="font-headline text-2xl font-bold tracking-tight">The Pros Event Plan</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-sm font-medium hover:text-primary transition-colors mt-2" href="/dashboard">
+          <Link className="text-sm font-medium hover:text-primary transition-colors" href="/dashboard">
             Dashboard
           </Link>
-          <Button asChild variant="default" className="rounded-full shadow-lg shadow-primary/20">
-            <Link href="/dashboard">Join the Team</Link>
-          </Button>
         </nav>
       </header>
 
