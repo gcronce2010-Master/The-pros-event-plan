@@ -10,15 +10,16 @@ interface FirebaseClientProviderProps {
 
 /**
  * Initializes Firebase on the client and wraps the app.
+ * Handles the case where services might be null during SSR.
  */
 export function FirebaseClientProvider({ children }: FirebaseClientProviderProps) {
   const services = useMemo(() => initializeFirebase(), []);
 
   return (
     <FirebaseProvider
-      firebaseApp={services.firebaseApp}
-      auth={services.auth}
-      firestore={services.firestore}
+      firebaseApp={services?.firebaseApp ?? null}
+      auth={services?.auth ?? null}
+      firestore={services?.firestore ?? null}
     >
       {children}
     </FirebaseProvider>

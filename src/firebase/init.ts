@@ -14,27 +14,34 @@ export interface FirebaseServices {
   firestore: Firestore;
 }
 
+let services: FirebaseServices | null = null;
+
 /**
  * Initializes the Firebase app and its core services.
+ * Ensures it only runs on the client and is idempotent.
  */
-export function initializeFirebase(): FirebaseServices {
+export function initializeFirebase(): FirebaseServices | null {
+  if (typeof window === 'undefined') return null;
+
+  if (services) return services;
+
   let app: FirebaseApp;
 
   if (!getApps().length) {
     try {
-      // Attempt automatic initialization (e.g., in App Hosting)
-      app = initializeApp();
-    } catch (e) {
-      // Fallback to manual config
       app = initializeApp(firebaseConfig);
+    } catch (e) {
+      app = getApp();
     }
   } else {
     app = getApp();
   }
 
-  return {
+  services = {
     firebaseApp: app,
     auth: getAuth(app),
     firestore: getFirestore(app),
   };
+
+  return services;
 }
