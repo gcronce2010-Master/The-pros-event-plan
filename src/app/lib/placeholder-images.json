@@ -3,27 +3,27 @@
   "placeholderImages": [
     {
       "id": "hero-party",
-      "description": "A sophisticated high-end corporate gala with elegant lighting.",
-      "imageUrl": "https://picsum.photos/seed/pro-gala/1200/600",
-      "imageHint": "luxury gala"
+      "description": "A modern architectural space with warm wood accents and massive glass walls overlooking a lush, sun-drenched forest at dawn.",
+      "imageUrl": "https://picsum.photos/seed/modern-forest-venue/1200/600",
+      "imageHint": "modern woods"
     },
     {
       "id": "birthday-theme",
-      "description": "An elegant adult birthday celebration with gold and black decor.",
-      "imageUrl": "https://picsum.photos/seed/pro-birthday/800/600",
-      "imageHint": "elegant birthday"
+      "description": "A minimalist outdoor birthday setup in a woodland clearing with natural wood furniture and organic textures.",
+      "imageUrl": "https://picsum.photos/seed/woodland-birthday/800/600",
+      "imageHint": "forest party"
     },
     {
       "id": "dinner-theme",
-      "description": "A luxury dinner table setting with fine china and candles.",
-      "imageUrl": "https://picsum.photos/seed/pro-dinner/800/600",
-      "imageHint": "luxury dinner"
+      "description": "An elegant long wooden table set for a gourmet dinner inside a modern glass-walled cabin in the woods.",
+      "imageUrl": "https://picsum.photos/seed/modern-wood-dinner/800/600",
+      "imageHint": "forest dining"
     },
     {
       "id": "garden-theme",
-      "description": "A beautiful outdoor garden party with fairy lights at dusk.",
-      "imageUrl": "https://picsum.photos/seed/pro-garden/800/600",
-      "imageHint": "garden party"
+      "description": "A sleek modern terrace with vertical timber screens and integrated greenery overlooking a pine forest.",
+      "imageUrl": "https://picsum.photos/seed/modern-nature-retreat/800/600",
+      "imageHint": "modern nature"
     }
   ]
 }
