@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Sparkles, Calendar, MapPin, Users, PartyPopper, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { Sparkles, Calendar, MapPin, PartyPopper, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { brainstormPartyTheme, type BrainstormPartyThemeOutput } from '@/ai/flows/brainstorm-party-theme';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +21,7 @@ export default function NewEventPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const auth = useAuth();
+  const [mounted, setMounted] = useState(false);
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -38,10 +38,14 @@ export default function NewEventPage() {
   const [aiSuggestions, setAiSuggestions] = useState<BrainstormPartyThemeOutput | null>(null);
 
   useEffect(() => {
-    if (!isUserLoading && !user && auth) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isUserLoading && !user && auth) {
       initiateAnonymousSignIn(auth);
     }
-  }, [user, isUserLoading, auth]);
+  }, [user, isUserLoading, auth, mounted]);
 
   const handleBrainstorm = async () => {
     if (!formData.name || !formData.vibe) {
@@ -55,7 +59,6 @@ export default function NewEventPage() {
 
     setLoading(true);
     try {
-      // We pass the name as the 'occasion' to the AI flow
       const result = await brainstormPartyTheme({
         occasion: formData.name,
         guestCount: formData.guestCount,
@@ -75,7 +78,6 @@ export default function NewEventPage() {
   };
 
   const selectTheme = (theme: string) => {
-    // Keep the original name but note the theme
     setFormData({ ...formData, description: `Theme: ${theme}. ${formData.description}` });
     setStep(3);
   };
@@ -118,7 +120,7 @@ export default function NewEventPage() {
     }
   };
 
-  if (isUserLoading) {
+  if (!mounted || isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

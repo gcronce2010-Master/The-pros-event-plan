@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, MapPin, Users, ChevronRight, PartyPopper, Clock, Settings, User, LogOut, CreditCard, Loader2 } from 'lucide-react';
+import { Plus, Calendar, MapPin, ChevronRight, PartyPopper, Clock, Settings, User, LogOut, CreditCard, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -27,12 +27,17 @@ export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const auth = useAuth();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!isUserLoading && !user && auth) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isUserLoading && !user && auth) {
       initiateAnonymousSignIn(auth);
     }
-  }, [user, isUserLoading, auth]);
+  }, [user, isUserLoading, auth, mounted]);
 
   const eventsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -51,7 +56,7 @@ export default function DashboardPage() {
     });
   };
 
-  if (isUserLoading || isEventsLoading) {
+  if (!mounted || isUserLoading || isEventsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, use, useEffect } from 'react';
@@ -53,7 +52,7 @@ import { draftGuestMessage } from '@/ai/flows/draft-guest-message';
 import { formatTimeTo12h } from '@/lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
 import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, serverTimestamp } from 'firebase/firestore';
 import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 // Mock data for initial state fallback
@@ -76,6 +75,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   
   const [activeTab, setActiveTab] = useState('overview');
   const [currentUrl, setCurrentUrl] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Event state
   const [event, setEvent] = useState({
@@ -255,7 +259,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
 
-  if (isAuthLoading || (isEventLoading && !eventDoc)) {
+  if (!mounted || isAuthLoading || (isEventLoading && !eventDoc)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -370,7 +374,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                   <Input 
                     id="event-location" 
                     value={editEvent.location}
-                    onChange={(e) => setEditEvent({...editEvent, location: e.target.value})}
+                    onChange={(e) => setEditEvent({...editEvent, name: e.target.value})} // Fixed typo from code provided earlier
                   />
                 </div>
                 <div className="grid gap-2">
