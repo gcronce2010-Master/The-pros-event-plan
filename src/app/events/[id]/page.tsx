@@ -43,15 +43,20 @@ import {
   Zap,
   ExternalLink,
   QrCode,
-  Share2
+  Share2,
+  Clock,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { suggestPartyTasks } from '@/ai/flows/suggest-party-tasks';
 import { draftGuestMessage } from '@/ai/flows/draft-guest-message';
 import { formatTimeTo12h } from '@/lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
+import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
-// Mock data for initial state
+// Mock data for initial state fallback
 const MOCK_GUESTS = [
   { id: '1', name: 'Tony Stark', status: 'Attending', diet: 'Cheeseburgers' },
   { id: '2', name: 'Bruce Banner', status: 'Maybe', diet: 'None' },
@@ -59,15 +64,49 @@ const MOCK_GUESTS = [
 ];
 
 const MOCK_MESSAGES = [
-  { id: '1', sender: 'Coordinator', text: "Avengers, assemble for the celebration!", time: '10:00 AM EST' },
+  { id: '1', sender: 'Coordinator', text: "Team, the coordinates are confirmed for Grants 50th.", time: '10:00 AM EST' },
   { id: '2', sender: 'Tony Stark', text: "I'll bring the tech. Who's got the food?", time: '10:05 AM EST' },
 ];
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { toast } = useToast();
+  const { user, isUserLoading: isAuthLoading } = useUser();
+  const firestore = useFirestore();
+  
   const [activeTab, setActiveTab] = useState('overview');
   const [currentUrl, setCurrentUrl] = useState('');
+
+  // Event state
+  const [event, setEvent] = useState({
+    name: "Grants 50th Birthday Bash",
+    date: '2026-05-15',
+    time: '18:00',
+    location: 'Modern Forest Venue, Seattle, WA',
+    theme: 'Modern Woodland',
+    description: 'A celebration of a half-century in the great outdoors.'
+  });
+
+  // Firestore Data Fetching
+  const eventRef = useMemoFirebase(() => {
+    if (!firestore || !user || !id) return null;
+    return doc(firestore, 'users', user.uid, 'events', id);
+  }, [firestore, user, id]);
+
+  const { data: eventDoc, isLoading: isEventLoading } = useDoc(eventRef);
+
+  useEffect(() => {
+    if (eventDoc) {
+      setEvent({
+        name: eventDoc.name,
+        date: eventDoc.date,
+        time: eventDoc.time,
+        location: eventDoc.location,
+        theme: eventDoc.theme,
+        description: eventDoc.description
+      });
+    }
+  }, [eventDoc]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -75,16 +114,6 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     }
   }, []);
   
-  // Event state
-  const [event, setEvent] = useState({
-    name: "The Hero Assembly Gala",
-    date: '2024-08-20',
-    time: '20:00', // Using 24h format for internal storage/input, formatTimeTo12h for display
-    location: 'Solitude Links, Smiths Creek, MI',
-    theme: 'Cape and Mask',
-    description: 'A night of celebration for our local protectors. Dress code: Your finest heroic attire.'
-  });
-
   const [tasks, setTasks] = useState<{description: string, timeline: string, completed: boolean}[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [message, setMessage] = useState('');
@@ -107,6 +136,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const [editEvent, setEditEvent] = useState({ ...event });
 
   const handleUpdateEvent = () => {
+    if (!eventRef) return;
+    
+    updateDocumentNonBlocking(eventRef, {
+      ...editEvent,
+      updatedAt: serverTimestamp()
+    });
+
     setEvent(editEvent);
     setIsSettingsOpen(false);
     toast({ 
@@ -119,7 +155,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     setLoadingTasks(true);
     try {
       const result = await suggestPartyTasks({
-        eventType: "Hero Gala",
+        eventType: "Birthday Bash",
         theme: event.theme,
         eventDate: new Date(event.date).toISOString(),
       });
@@ -169,7 +205,6 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const handleSendMessage = () => {
     if (!message.trim()) return;
     
-    // Explicitly use 12-hour format and New York time zone for EST
     const timestamp = new Date().toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit', 
@@ -219,6 +254,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
       });
     }
   };
+
+  if (isAuthLoading || (isEventLoading && !eventDoc)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -375,15 +418,22 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                       <p className="text-sm text-muted-foreground">{event.description}</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="flex items-center gap-3">
                       <div className="bg-primary/10 p-2 rounded-lg text-primary"><Calendar className="h-5 w-5" /></div>
                       <div>
-                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Launch Window</p>
-                        <p className="font-medium">{event.date} @ {formatTimeTo12h(event.time)}</p>
+                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Event Date</p>
+                        <p className="font-medium">{event.date}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-2 rounded-lg text-primary"><Clock className="h-5 w-5" /></div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Event Time</p>
+                        <p className="font-medium">{formatTimeTo12h(event.time)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 sm:col-span-2">
                       <div className="bg-primary/10 p-2 rounded-lg text-primary"><MapPin className="h-5 w-5" /></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Coordinates</p>
@@ -469,7 +519,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                         <Label htmlFor="task-desc">Objective Description</Label>
                         <Input 
                           id="task-desc" 
-                          placeholder="e.g., Secure the vibranium" 
+                          placeholder="e.g., Secure the venue" 
                           value={newTaskDesc}
                           onChange={(e) => setNewTaskDesc(e.target.value)}
                         />
