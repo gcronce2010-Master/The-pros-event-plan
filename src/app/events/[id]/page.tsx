@@ -79,6 +79,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
   }, []);
 
   // Event state
@@ -112,12 +115,6 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     }
   }, [eventDoc]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentUrl(window.location.href);
-    }
-  }, []);
-  
   const [tasks, setTasks] = useState<{description: string, timeline: string, completed: boolean}[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [message, setMessage] = useState('');
@@ -374,7 +371,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                   <Input 
                     id="event-location" 
                     value={editEvent.location}
-                    onChange={(e) => setEditEvent({...editEvent, name: e.target.value})} // Fixed typo from code provided earlier
+                    onChange={(e) => setEditEvent({...editEvent, location: e.target.value})}
                   />
                 </div>
                 <div className="grid gap-2">

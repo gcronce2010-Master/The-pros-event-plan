@@ -1,6 +1,6 @@
 'use client';
 
-import { firebaseConfig } from '@/firebase/config';
+import { firebaseConfig } from './config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
@@ -21,6 +21,7 @@ let services: FirebaseServices | null = null;
  * Ensures it only runs on the client and is idempotent.
  */
 export function initializeFirebase(): FirebaseServices | null {
+  // Prevent server-side initialization
   if (typeof window === 'undefined') return null;
 
   if (services) return services;
