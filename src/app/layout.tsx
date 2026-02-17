@@ -12,9 +12,13 @@ export const metadata: Metadata = {
     title: 'The Pros Event Plan',
   },
   icons: {
+    icon: '/favicon.ico',
     apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180' },
-      { url: '/apple-touch-icon-precomposed.png', sizes: '180x180' },
+      {
+        url: 'https://picsum.photos/seed/pro-plan-icon/180/180',
+        sizes: '180x180',
+        type: 'image/png',
+      },
     ],
   },
 };
@@ -36,9 +40,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-        {/* Explicit links for older iOS versions */}
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png" />
+        {/* Fallback for Apple devices using a valid remote icon to prevent 404s */}
+        <link rel="apple-touch-icon" href="https://picsum.photos/seed/pro-plan-icon/180/180" />
       </head>
       <body className="font-body antialiased bg-background text-foreground min-h-screen">
         <FirebaseClientProvider>
