@@ -9,9 +9,9 @@ import {
   QuerySnapshot,
   CollectionReference,
 } from 'firebase/firestore';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
-import { isFirebaseMemoized } from '@/firebase/memo';
+import { errorEmitter } from '../error-emitter';
+import { FirestorePermissionError } from '../errors';
+import { isFirebaseMemoized } from '../memo';
 
 export type WithId<T> = T & { id: string };
 
