@@ -4,7 +4,7 @@ import React, { createContext, useContext, ReactNode, useMemo, useState, useEffe
 import { FirebaseApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged } from 'firebase/auth';
-import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+import { FirebaseErrorListener } from './error-listener';
 
 interface FirebaseProviderProps {
   children: ReactNode;
@@ -85,9 +85,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   );
 };
 
-/**
- * Hook to access core Firebase services and user authentication state.
- */
 export const useFirebase = () => {
   const context = useContext(FirebaseContext);
   if (context === undefined) {
