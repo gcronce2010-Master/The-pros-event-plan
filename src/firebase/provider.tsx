@@ -40,9 +40,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   firestore,
   auth,
 }) => {
+  // Initialize isUserLoading to true to match server/client initial render
+  // and avoid hydration mismatches.
   const [userAuthState, setUserAuthState] = useState<UserAuthState>({
     user: null,
-    isUserLoading: !!auth,
+    isUserLoading: true,
     userError: null,
   });
 
