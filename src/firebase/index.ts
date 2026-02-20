@@ -2,8 +2,7 @@
 
 /**
  * @fileOverview Barrel file for Firebase functionality.
- * Exports hooks and initialization logic for use throughout the application.
- * Uses explicit exports to prevent circular dependency issues and improve Turbopack resolution.
+ * Explicitly exports functions to improve Turbopack resolution and prevent circular dependencies.
  */
 
 export { initializeFirebase } from './init';
