@@ -293,8 +293,17 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl border-2 border-dashed border-primary/20 space-y-6">
-                <div className="p-4 bg-white rounded-2xl shadow-xl ring-1 ring-border">
-                  {currentUrl && <QRCodeSVG value={currentUrl} size={200} />}
+                <div className="p-4 bg-white rounded-2xl shadow-xl ring-1 ring-border flex items-center justify-center">
+                  {mounted && currentUrl ? (
+                    <QRCodeSVG 
+                      value={currentUrl} 
+                      size={200} 
+                      includeMargin={true}
+                      level="M"
+                    />
+                  ) : (
+                    <div className="w-[200px] h-[200px] bg-muted animate-pulse rounded-lg" />
+                  )}
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2">Scan to join</p>
@@ -478,8 +487,17 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                         <DialogTitle className="text-center font-headline">Broadcast QR</DialogTitle>
                       </DialogHeader>
                       <div className="flex flex-col items-center justify-center p-6 space-y-4">
-                        <div className="p-4 bg-white rounded-2xl shadow-xl ring-1 ring-border">
-                          {currentUrl && <QRCodeSVG value={currentUrl} size={220} />}
+                        <div className="p-4 bg-white rounded-2xl shadow-xl ring-1 ring-border flex items-center justify-center">
+                          {mounted && currentUrl ? (
+                            <QRCodeSVG 
+                              value={currentUrl} 
+                              size={220} 
+                              includeMargin={true}
+                              level="M"
+                            />
+                          ) : (
+                            <div className="w-[220px] h-[220px] bg-muted animate-pulse rounded-lg" />
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground text-center px-4 italic">
                           Have your allies scan this code with their vision tech to access the mission briefing.

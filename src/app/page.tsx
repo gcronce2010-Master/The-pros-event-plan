@@ -11,8 +11,10 @@ import { QRCodeSVG } from 'qrcode.react';
 export default function Home() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-party');
   const [currentUrl, setCurrentUrl] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== 'undefined') {
       setCurrentUrl(window.location.origin);
     }
@@ -57,7 +59,7 @@ export default function Home() {
                   </Button>
                 </div>
               </div>
-              <div className="relative aspect-video lg:aspect-square overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(30,64,175,0.3)] animate-fade-in group border-4 border-white">
+              <div className="relative aspect-video lg:aspect-square overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(230,92,51,0.2)] animate-fade-in group border-4 border-white">
                 {heroImage && (
                   <Image
                     src={heroImage.imageUrl}
@@ -123,8 +125,19 @@ export default function Home() {
           <div className="container mx-auto px-4 flex flex-col items-center text-center">
             <h2 className="text-3xl font-headline font-bold mb-6">Mobile HQ Activation</h2>
             <p className="text-muted-foreground max-w-md mb-10">Scan to access your command center from any mobile device and manage your events on the go.</p>
-            <div className="bg-white p-6 rounded-[2rem] shadow-2xl ring-4 ring-primary/10 hover:scale-105 transition-transform">
-              {currentUrl && <QRCodeSVG value={currentUrl} size={180} />}
+            <div className="bg-white p-6 rounded-[2rem] shadow-2xl ring-4 ring-primary/10 hover:scale-105 transition-transform flex items-center justify-center">
+              {mounted && currentUrl ? (
+                <QRCodeSVG 
+                  value={currentUrl} 
+                  size={200} 
+                  includeMargin={true}
+                  level="M"
+                />
+              ) : (
+                <div className="w-[200px] h-[200px] flex items-center justify-center bg-muted rounded-xl">
+                  <QrCode className="h-10 w-10 text-muted-foreground animate-pulse" />
+                </div>
+              )}
             </div>
           </div>
         </section>
