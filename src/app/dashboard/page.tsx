@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -54,6 +55,12 @@ export default function DashboardPage() {
       title: `${item} Settings`,
       description: `This feature is coming soon in the next update!`,
     });
+  };
+
+  const getEventImage = (index: number) => {
+    // Cycle through woodsy placeholder images
+    const images = PlaceHolderImages.filter(img => img.id !== 'hero-party');
+    return images[index % images.length];
   };
 
   if (!mounted || isUserLoading || isEventsLoading) {
@@ -124,51 +131,55 @@ export default function DashboardPage() {
 
         {events && events.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => (
-              <Card key={event.id} className="overflow-hidden group hover:shadow-xl transition-all border-none shadow-md ring-1 ring-border">
-                <div className="relative h-48 w-full overflow-hidden">
-                  <Image 
-                    src={PlaceHolderImages[0].imageUrl} 
-                    alt={event.name} 
-                    fill 
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute top-3 left-3">
-                    <Badge className="bg-white/90 text-primary hover:bg-white backdrop-blur-sm border-none shadow-sm font-semibold">
-                      Upcoming
-                    </Badge>
+            {events.map((event, index) => {
+              const eventImg = getEventImage(index);
+              return (
+                <Card key={event.id} className="overflow-hidden group hover:shadow-xl transition-all border-none shadow-md ring-1 ring-border">
+                  <div className="relative h-48 w-full overflow-hidden">
+                    <Image 
+                      src={eventImg.imageUrl} 
+                      alt={event.name} 
+                      fill 
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      data-ai-hint={eventImg.imageHint}
+                    />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-white/90 text-primary hover:bg-white backdrop-blur-sm border-none shadow-sm font-semibold">
+                        Upcoming
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-                <CardHeader className="pb-2">
-                  <CardTitle className="font-headline text-xl leading-tight group-hover:text-primary transition-colors">
-                    {event.name}
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-1.5 pt-1">
-                    <span className="font-medium text-accent">{event.theme}</span>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3 pb-4">
-                  <div className="flex items-center text-sm text-muted-foreground gap-2">
-                    <Calendar className="h-4 w-4 text-primary/70" />
-                    <span>{event.date}</span>
-                    <Clock className="h-4 w-4 text-primary/70 ml-2" />
-                    <span>{formatTimeTo12h(event.time)}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground gap-2">
-                    <MapPin className="h-4 w-4 text-primary/70" />
-                    <span className="truncate">{event.location}</span>
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-0">
-                  <Button asChild className="w-full rounded-xl bg-secondary text-primary hover:bg-primary hover:text-white transition-all group/btn shadow-none border border-primary/10">
-                    <Link href={`/events/${event.id}`}>
-                      Manage Event
-                      <ChevronRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+                  <CardHeader className="pb-2">
+                    <CardTitle className="font-headline text-xl leading-tight group-hover:text-primary transition-colors">
+                      {event.name}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-1.5 pt-1">
+                      <span className="font-medium text-accent">{event.theme}</span>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3 pb-4">
+                    <div className="flex items-center text-sm text-muted-foreground gap-2">
+                      <Calendar className="h-4 w-4 text-primary/70" />
+                      <span>{event.date}</span>
+                      <Clock className="h-4 w-4 text-primary/70 ml-2" />
+                      <span>{formatTimeTo12h(event.time)}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground gap-2">
+                      <MapPin className="h-4 w-4 text-primary/70" />
+                      <span className="truncate">{event.location}</span>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="pt-0">
+                    <Button asChild className="w-full rounded-xl bg-secondary text-primary hover:bg-primary hover:text-white transition-all group/btn shadow-none border border-primary/10">
+                      <Link href={`/events/${event.id}`}>
+                        Manage Event
+                        <ChevronRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
             
             <Link 
               href="/events/new" 

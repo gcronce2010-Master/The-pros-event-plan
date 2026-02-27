@@ -1,3 +1,4 @@
+
 {
   "placeholderImages": [
     {
@@ -23,6 +24,12 @@
       "description": "A sleek modern terrace with vertical timber screens and integrated greenery overlooking a pine forest.",
       "imageUrl": "https://picsum.photos/seed/modern-nature-retreat/800/600",
       "imageHint": "modern nature"
+    },
+    {
+      "id": "mission-hq",
+      "description": "A high-tech tactical briefing room with wooden walls and holographic displays.",
+      "imageUrl": "https://picsum.photos/seed/tactical-hq/800/600",
+      "imageHint": "tactical room"
     }
   ]
 }

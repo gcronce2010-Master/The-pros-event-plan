@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, use, useEffect } from 'react';
@@ -8,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import Image from 'next/image';
 import { 
   Dialog,
   DialogContent,
@@ -44,7 +46,8 @@ import {
   QrCode,
   Share2,
   Clock,
-  Loader2
+  Loader2,
+  Target
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { suggestPartyTasks } from '@/ai/flows/suggest-party-tasks';
@@ -54,6 +57,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, serverTimestamp } from 'firebase/firestore';
 import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 // Mock data for initial state fallback
 const MOCK_GUESTS = [
@@ -256,6 +260,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
 
+  const missionHqImage = PlaceHolderImages.find(img => img.id === 'mission-hq') || PlaceHolderImages[0];
+
   if (!mounted || isAuthLoading || (isEventLoading && !eventDoc)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -414,7 +420,20 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
 
           <TabsContent value="overview" className="animate-fade-in space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="md:col-span-2 shadow-lg border-2 border-primary/10">
+              <Card className="md:col-span-2 shadow-lg border-2 border-primary/10 overflow-hidden">
+                <div className="relative h-48 w-full">
+                  <Image 
+                    src={missionHqImage.imageUrl} 
+                    alt="Mission HQ" 
+                    fill 
+                    className="object-cover"
+                    data-ai-hint={missionHqImage.imageHint}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-4 left-6">
+                    <h2 className="text-white text-2xl font-headline font-bold">Mission Overview</h2>
+                  </div>
+                </div>
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2">
                     <Zap className="h-5 w-5 text-accent fill-current" /> Tactical Intel
