@@ -5,13 +5,13 @@
       "id": "hero-party",
       "description": "A modern architectural space with warm wood accents and massive glass walls overlooking a lush, sun-drenched forest at dawn.",
       "imageUrl": "https://picsum.photos/seed/modern-forest-venue/1200/600",
-      "imageHint": "modern woods"
+      "imageHint": "modern forest"
     },
     {
       "id": "birthday-theme",
       "description": "A minimalist outdoor birthday setup in a woodland clearing with natural wood furniture and organic textures.",
       "imageUrl": "https://picsum.photos/seed/woodland-birthday/800/600",
-      "imageHint": "forest party"
+      "imageHint": "woodland party"
     },
     {
       "id": "dinner-theme",
@@ -30,6 +30,12 @@
       "description": "A high-tech tactical briefing room with wooden walls and holographic displays.",
       "imageUrl": "https://picsum.photos/seed/tactical-hq/800/600",
       "imageHint": "tactical room"
+    },
+    {
+      "id": "celebration-night",
+      "description": "A modern forest cabin glowing warmly at night with outdoor string lights and guests gathering around.",
+      "imageUrl": "https://picsum.photos/seed/forest-night/800/600",
+      "imageHint": "night celebration"
     }
   ]
 }
